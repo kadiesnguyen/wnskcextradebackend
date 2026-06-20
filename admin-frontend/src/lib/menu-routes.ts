@@ -232,7 +232,7 @@ function restructureMenuTree(source: AdminMenuTree): AdminMenuTree["child"] {
       continue;
     }
 
-    const items = [...bucket.values()]
+    const items = Array.from(bucket.values())
       .sort((a, b) => a.order - b.order)
       .map(({ item }) => item);
 

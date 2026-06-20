@@ -5,7 +5,7 @@ import { usePathname, useRouter } from "next/navigation";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { fetchContractOrderAlert, markContractOrdersNotified } from "./api";
 import { playContractOrderAlertSound } from "./playAlertSound";
-import type { ContractOrderAlertData } from "./types";
+import type { ContractOrderAlertData, ContractOrderAlertResponse } from "./types";
 
 export const contractOrderAlertQueryKey = ["admin", "contract-order-alert"] as const;
 const CONTRACT_ORDERS_PATH = "/trading/orders";
@@ -28,14 +28,14 @@ export function useContractOrderAlert() {
   });
 
   useEffect(() => {
-    const hasNew = Boolean(data?.data.has_new);
+    const payload = data?.data;
 
-    if (!hasNew) {
+    if (!payload?.has_new) {
       hadNewOrdersRef.current = false;
       return;
     }
 
-    setAlertData(data.data);
+    setAlertData(payload);
 
     if (!hadNewOrdersRef.current) {
       hadNewOrdersRef.current = true;
@@ -61,7 +61,7 @@ export function useContractOrderAlert() {
     setIsOpen(false);
     setAlertData(null);
 
-    queryClient.setQueryData(contractOrderAlertQueryKey, (current) => {
+    queryClient.setQueryData<ContractOrderAlertResponse>(contractOrderAlertQueryKey, (current) => {
       if (!current?.data) return current;
 
       return {
