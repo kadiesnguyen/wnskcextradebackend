@@ -125,6 +125,8 @@ Route::middleware(['auth:admin', 'check.admin.status'])->group(function () {
 
     Route::get('contract-queue', [ContractQueueController::class, 'index']);
     Route::post('contract-queue/action', [ContractQueueController::class, 'action']);
+    Route::put('contract-queue/{id}', [ContractQueueController::class, 'update'])->whereNumber('id');
+    Route::delete('contract-queue/{id}', [ContractQueueController::class, 'destroy'])->whereNumber('id');
 
     Route::get('contract-settings', [ContractSettingController::class, 'show']);
     Route::put('contract-settings', [ContractSettingController::class, 'update']);

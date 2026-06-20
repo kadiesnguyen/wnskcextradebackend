@@ -1,5 +1,6 @@
 "use client";
 
+import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import {
   depositMethodLabel,
   depositStatusLabel,
@@ -26,18 +27,18 @@ export function DepositList({
   const { t } = useI18n();
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell>
+      <table className={tableClassName}>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.id")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.username")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.coin")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.amount")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.method")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.status")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.submitted")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.actions")}</th>
+            <th scope="col" className={thClassName}>{t("common.id")}</th>
+            <th scope="col" className={thClassName}>{t("common.username")}</th>
+            <th scope="col" className={thClassName}>{t("common.coin")}</th>
+            <th scope="col" className={thClassName}>{t("common.amount")}</th>
+            <th scope="col" className={thClassName}>{t("common.method")}</th>
+            <th scope="col" className={thClassName}>{t("common.status")}</th>
+            <th scope="col" className={thClassName}>{t("common.submitted")}</th>
+            <th scope="col" className={thClassName}>{t("common.actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -76,6 +77,6 @@ export function DepositList({
           })}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

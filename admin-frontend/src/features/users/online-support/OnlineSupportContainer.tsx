@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useMemo } from "react";
 import { ActionButton, RowActions } from "@/components/actions";
-import { ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, actionsColumn } from "@/components/list/ListPageParts";
+import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, actionsColumn } from "@/components/list/ListPageParts"
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
@@ -34,8 +34,8 @@ export function OnlineSupportContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username}</DataTableCell>
                 <td className="px-4 py-3">{item.pending_count}</td>
                 <ActionsCell>
                   <RowActions>

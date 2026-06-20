@@ -2,7 +2,7 @@
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import { ActionButton, RowActions } from "@/components/actions";
-import { ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts";
+import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
@@ -45,8 +45,8 @@ export function AgentListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username}</DataTableCell>
                 <td className="px-4 py-3">{item.invit ?? "—"}</td>
                 <td className="px-4 py-3">{item.one ?? 0}</td>
                 <td className="px-4 py-3">{item.two ?? 0}</td>

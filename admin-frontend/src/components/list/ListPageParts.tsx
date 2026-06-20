@@ -2,6 +2,16 @@
 
 import { useI18n } from "@/lib/i18n/useI18n";
 import type { PaginatedMeta } from "@/lib/types/api";
+import {
+  DataTableProvider,
+  TableShell,
+  tableClassName,
+  thClassName,
+  theadClassName,
+  useTableColumns,
+} from "./TableShell";
+
+export { DataTableCell, TableActions, CompactActionButton } from "./TableShell";
 
 type PageHeaderProps = {
   titleKey: string;
@@ -137,6 +147,7 @@ export type DataTableColumn = {
   key: string;
   label: string;
   className?: string;
+  hideBelow?: "md" | "lg" | "xl";
 };
 
 type DataTableProps = {
@@ -149,11 +160,22 @@ type DataTableProps = {
 };
 
 export function checkboxColumn(t: (key: string) => string): DataTableColumn {
-  return { key: "_select", label: "", className: "w-10" };
+  return { key: "_select", label: "", className: "w-[4%]" };
 }
 
 export function actionsColumn(t: (key: string) => string): DataTableColumn {
-  return { key: "actions", label: t("common.actions"), className: "whitespace-nowrap" };
+  return {
+    key: "actions",
+    label: t("common.actions"),
+    className: "w-[14%]",
+  };
+}
+
+function hideClass(hideBelow?: DataTableColumn["hideBelow"]) {
+  if (hideBelow === "md") return "hidden md:table-cell";
+  if (hideBelow === "lg") return "hidden lg:table-cell";
+  if (hideBelow === "xl") return "hidden xl:table-cell";
+  return "";
 }
 
 type RowCheckboxProps = {
@@ -187,38 +209,46 @@ export function DataTable({
   const { t } = useI18n();
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full divide-y divide-border text-sm">
-        <thead className="bg-surface-elevated">
-          <tr>
-            {selectable ? (
-              <th scope="col" className="w-10 px-4 py-3">
-                <input
-                  type="checkbox"
-                  checked={allSelected}
-                  ref={(el) => {
-                    if (el) el.indeterminate = Boolean(someSelected);
-                  }}
-                  onChange={onToggleAll}
-                  aria-label={t("common.selectAll")}
-                  className="rounded border-border"
-                />
-              </th>
-            ) : null}
+    <DataTableProvider columns={columns}>
+      <TableShell>
+        <table className={tableClassName}>
+          <colgroup>
+            {selectable ? <col className="w-[4%]" /> : null}
             {columns.map((col) => (
-              <th
-                key={col.key}
-                scope="col"
-                className={`px-4 py-3 text-left font-medium text-muted ${col.className ?? ""}`}
-              >
-                {col.label}
-              </th>
+              <col key={col.key} className={col.className} />
             ))}
-          </tr>
-        </thead>
-        <tbody className="divide-y divide-border bg-surface">{children}</tbody>
-      </table>
-    </div>
+          </colgroup>
+          <thead className={theadClassName}>
+            <tr>
+              {selectable ? (
+                <th scope="col" className={`${thClassName} w-[4%]`}>
+                  <input
+                    type="checkbox"
+                    checked={allSelected}
+                    ref={(el) => {
+                      if (el) el.indeterminate = Boolean(someSelected);
+                    }}
+                    onChange={onToggleAll}
+                    aria-label={t("common.selectAll")}
+                    className="rounded border-border"
+                  />
+                </th>
+              ) : null}
+              {columns.map((col) => (
+                <th
+                  key={col.key}
+                  scope="col"
+                  className={`${thClassName} ${col.className ?? ""} ${hideClass(col.hideBelow)}`.trim()}
+                >
+                  {col.label}
+                </th>
+              ))}
+            </tr>
+          </thead>
+          <tbody className="divide-y divide-border bg-surface">{children}</tbody>
+        </table>
+      </TableShell>
+    </DataTableProvider>
   );
 }
 
@@ -227,7 +257,20 @@ type ActionsCellProps = {
 };
 
 export function ActionsCell({ children }: ActionsCellProps) {
-  return <td className="px-4 py-3">{children}</td>;
+  const columns = useTableColumns();
+  const actionsLabel =
+    columns.find((col) => col.key === "actions")?.label ??
+    columns.find((col) => col.key.endsWith("actions"))?.label ??
+    "Actions";
+
+  return (
+    <td
+      data-label={actionsLabel}
+      className="admin-table-actions min-w-0 px-2 py-2 align-middle md:px-3 md:py-2.5"
+    >
+      <div className="flex max-w-full flex-wrap gap-1.5">{children}</div>
+    </td>
+  );
 }
 
 type UsernameFilterProps = {

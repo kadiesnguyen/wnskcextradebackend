@@ -22,7 +22,12 @@ export function LatestMembersPanel({
   agentBadge,
 }: LatestMembersPanelProps) {
   return (
-    <DashboardCard title={title} action={{ label: viewAllLabel, href: "/users" }} bodyClassName="overflow-auto p-0" className="h-[248px]">
+    <DashboardCard
+      title={title}
+      action={{ label: viewAllLabel, href: "/users" }}
+      bodyClassName="overflow-auto p-0"
+      className="h-full min-h-[15.5rem]"
+    >
       {members.length === 0 ? (
         <p className="px-4 py-6 text-sm text-muted">{emptyLabel}</p>
       ) : (
@@ -36,18 +41,18 @@ export function LatestMembersPanel({
                 <div className="flex items-center gap-2">
                   <p className="truncate text-sm font-medium text-foreground">{member.username}</p>
                   {member.is_agent === 1 ? (
-                    <span className="shrink-0 rounded bg-primary/15 px-1.5 py-0.5 text-[10px] font-medium uppercase text-primary">
+                    <span className="shrink-0 rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium uppercase text-primary">
                       {agentBadge}
                     </span>
                   ) : null}
                 </div>
-                <p className="text-[11px] text-muted">{formatRelativeTime(member.addtime)} ago</p>
+                <p className="text-xs text-muted">{formatRelativeTime(member.addtime)} ago</p>
               </div>
               <span
-                className={`shrink-0 rounded-full px-2 py-0.5 text-[10px] font-medium ${
+                className={`shrink-0 rounded-full px-2 py-0.5 text-xs font-medium ${
                   member.status === 1
                     ? "bg-success/15 text-success"
-                    : "bg-white/5 text-muted"
+                    : "bg-muted-chip text-muted"
                 }`}
               >
                 {member.status === 1 ? statusActive : statusInactive}

@@ -1,5 +1,5 @@
-import { ContractQueuePanelContainer } from "@/features/trading/queue/ContractQueuePanelContainer";
+import { redirect } from "next/navigation";
 
 export default function ContractQueuePage() {
-  return <ContractQueuePanelContainer />;
+  redirect("/trading/orders");
 }

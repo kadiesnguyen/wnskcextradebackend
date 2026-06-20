@@ -14,6 +14,7 @@ import {
 import type { PendingCounts } from "@/lib/pending-counts/api";
 import { usePendingCounts } from "@/lib/pending-counts/usePendingCounts";
 import type { AdminMenuTree } from "@/features/auth/types";
+import { SidebarGroupIcon } from "./SidebarGroupIcon";
 
 type AppShellSidebarProps = {
   menuTree: AdminMenuTree;
@@ -41,15 +42,17 @@ function SidebarLink({
       <Link
         href={href}
         aria-current={isActive ? "page" : undefined}
-        className={`flex items-center justify-between gap-2 rounded px-3 py-2 text-sm transition ${
+        className={`flex items-center justify-between gap-2 rounded px-3 py-2 text-sm font-medium transition ${
           isActive
-            ? "bg-surface-elevated text-primary"
+            ? "bg-surface-elevated font-semibold text-primary"
             : hasBadge
               ? "text-danger hover:bg-surface-elevated hover:text-danger"
               : "text-foreground hover:bg-surface-elevated hover:text-primary"
         }`}
       >
-        <span>{label}</span>
+        <span className="whitespace-nowrap" title={label}>
+          {label}
+        </span>
         {hasBadge ? (
           <span
             aria-label={`${badgeCount} pending`}
@@ -82,7 +85,7 @@ export function AppShellSidebar({ menuTree }: AppShellSidebarProps) {
   return (
     <aside
       aria-label="Admin navigation"
-      className="hidden w-56 shrink-0 border-r border-border bg-surface md:block"
+      className="hidden w-80 shrink-0 border-r border-border bg-surface md:block"
     >
       <div className="border-b border-border px-4 py-4">
         <p className="text-xs uppercase tracking-wide text-muted">{t("app.brand")}</p>
@@ -100,10 +103,13 @@ export function AppShellSidebar({ menuTree }: AppShellSidebarProps) {
 
           {groups.map(([groupName, items]) => (
             <li key={groupName}>
-              <p className="px-3 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-muted">
-                {t(resolveGroupLabelKey(groupName))}
-              </p>
-              <ul className="ml-3 space-y-1 border-l border-border pl-3">
+              <div className="flex items-center gap-2 px-3 pb-1 pt-3">
+                <SidebarGroupIcon groupName={groupName} />
+                <span className="whitespace-nowrap text-xs font-semibold uppercase tracking-wide text-muted">
+                  {t(resolveGroupLabelKey(groupName))}
+                </span>
+              </div>
+              <ul className="ml-2 space-y-1 border-l border-border pl-2">
                 {items.map((item) => {
                   const href = resolveMenuPath(item.url);
                   if (!href) {

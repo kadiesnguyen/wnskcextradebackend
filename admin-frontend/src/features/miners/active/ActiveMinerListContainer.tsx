@@ -2,7 +2,7 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton, ToolbarActions, useRowSelection } from "@/components/actions";
-import { DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts";
+import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
@@ -52,8 +52,8 @@ export function ActiveMinerListContainer() {
             {items.map((item) => (
               <tr key={item.id}>
                 <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username}</DataTableCell>
                 <td className="px-4 py-3">{item.kjtitle ?? item.ktitle ?? item.status_label ?? "—"}</td>
                 <td className="px-4 py-3">{item.num ?? "—"} {item.coin ?? ""}</td>
                 <td className="px-4 py-3">{item.addtime}</td>

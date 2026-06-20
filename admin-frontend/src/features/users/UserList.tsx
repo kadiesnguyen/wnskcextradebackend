@@ -1,3 +1,4 @@
+import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import type { AdminUser } from "./types";
 
 type UserListProps = {
@@ -17,26 +18,26 @@ function formatTime(ts: number): string {
 
 export function UserList({ users }: UserListProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell>
+      <table className={tableClassName}>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               ID
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Username
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Name
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Phone
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Status
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Registered
             </th>
           </tr>
@@ -64,6 +65,6 @@ export function UserList({ users }: UserListProps) {
           ))}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

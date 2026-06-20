@@ -3,16 +3,14 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ActionButton, RowActions, ToolbarActions, useRowSelection } from "@/components/actions";
-import {
-  ActionsCell,
+import { DataTableCell, ActionsCell,
   DataTable,
   EmptyState,
   PageHeader,
   PageMetaBar,
   PaginationNav,
   RowCheckbox,
-  actionsColumn,
-} from "@/components/list/ListPageParts";
+  actionsColumn, } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";

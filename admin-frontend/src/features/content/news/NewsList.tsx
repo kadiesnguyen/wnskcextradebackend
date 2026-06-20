@@ -1,3 +1,4 @@
+import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { formatTimestamp } from "@/features/finance/lib/format";
 import type { AdminNews } from "./types";
 
@@ -14,23 +15,23 @@ function statusClass(status: number): string {
 
 export function NewsList({ items, onEdit, onDelete, pendingDeleteId }: NewsListProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell>
+      <table className={tableClassName}>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               ID
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Title
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Status
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Updated
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Actions
             </th>
           </tr>
@@ -78,6 +79,6 @@ export function NewsList({ items, onEdit, onDelete, pendingDeleteId }: NewsListP
           })}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

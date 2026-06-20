@@ -2,7 +2,7 @@
 
 import { useMemo, useState } from "react";
 import { ActionButton, ToolbarActions, useRowSelection } from "@/components/actions";
-import { DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter } from "@/components/list/ListPageParts";
+import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
@@ -77,8 +77,8 @@ export function BillListContainer({
             {items.map((item) => (
               <tr key={item.id}>
                 <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username}</DataTableCell>
                 <td className="px-4 py-3">{item.coinname?.toUpperCase()}</td>
                 <td className="px-4 py-3">{item.num}</td>
                 <td className="px-4 py-3">{item.st_label}</td>

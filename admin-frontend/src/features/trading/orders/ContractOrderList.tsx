@@ -1,12 +1,26 @@
 "use client";
 
 import {
+  AnnotatedCell,
+  CompactActionButton,
+  TableActions,
+  TableShell,
+  tableClassName,
+  thClassName,
+  theadClassName,
+} from "@/components/list/TableShell";
+import {
   contractHyzdLabel,
   contractKongykLabel,
   contractStatusLabel,
 } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
-import { formatTimestamp, kongykStatusClass } from "../lib/format";
+import {
+  formatCompactTimestamp,
+  formatTimestamp,
+  hyzdDirectionClass,
+  kongykStatusClass,
+} from "../lib/format";
 import type { ContractOrder } from "./types";
 
 type ContractOrderListProps = {
@@ -14,46 +28,120 @@ type ContractOrderListProps = {
   pendingActionId: number | null;
   onSetWinLoss: (order: ContractOrder, kongyk: 0 | 1 | 2) => void;
   onSettle: (order: ContractOrder) => void;
+  embedded?: boolean;
 };
+
+const fitCell = "admin-table-cell-fit";
+
+function DirectionBadge({ hyzd }: { hyzd: number }) {
+  const { t } = useI18n();
+  const label = contractHyzdLabel(t, hyzd);
+
+  return (
+    <span
+      className={`inline-flex whitespace-nowrap rounded px-2 py-0.5 text-xs font-semibold ${hyzdDirectionClass(hyzd)}`}
+    >
+      {label}
+    </span>
+  );
+}
+
+function OrderActions({
+  order,
+  isBusy,
+  onSetWinLoss,
+  onSettle,
+}: {
+  order: ContractOrder;
+  isBusy: boolean;
+  onSetWinLoss: (order: ContractOrder, kongyk: 0 | 1 | 2) => void;
+  onSettle: (order: ContractOrder) => void;
+}) {
+  const { t } = useI18n();
+
+  return (
+    <TableActions className="grid grid-cols-2 gap-1">
+      <CompactActionButton
+        variant="success"
+        disabled={isBusy}
+        className="justify-center"
+        onClick={() => onSetWinLoss(order, 1)}
+      >
+        {t("action.win")}
+      </CompactActionButton>
+      <CompactActionButton
+        variant="danger"
+        disabled={isBusy}
+        className="justify-center"
+        onClick={() => onSetWinLoss(order, 2)}
+      >
+        {t("action.loss")}
+      </CompactActionButton>
+      <CompactActionButton
+        disabled={isBusy}
+        className="justify-center"
+        onClick={() => onSetWinLoss(order, 0)}
+      >
+        {t("action.normal")}
+      </CompactActionButton>
+      <CompactActionButton
+        variant="primary"
+        disabled={isBusy}
+        className="justify-center"
+        onClick={() => onSettle(order)}
+      >
+        {t("action.settleOrder")}
+      </CompactActionButton>
+    </TableActions>
+  );
+}
 
 export function ContractOrderList({
   orders,
   pendingActionId,
   onSetWinLoss,
   onSettle,
+  embedded = false,
 }: ContractOrderListProps) {
   const { t } = useI18n();
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell className={embedded ? "rounded-none border-0" : undefined}>
+      <table className={tableClassName}>
+        <colgroup>
+          <col className="w-[21%]" />
+          <col className="w-[7%]" />
+          <col className="w-[6%]" />
+          <col className="w-[9%]" />
+          <col className="w-[9%]" />
+          <col className="w-[14%]" />
+          <col className="w-[14%]" />
+          <col className="w-[20%]" />
+        </colgroup>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">
-              {t("common.id")}
-            </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.username")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.coin")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.amount")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.direction")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.control")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.status")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.buyTime")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               {t("common.actions")}
             </th>
           </tr>
@@ -61,64 +149,59 @@ export function ContractOrderList({
         <tbody className="divide-y divide-border">
           {orders.map((order) => {
             const isBusy = pendingActionId === order.id;
+            const statusLabel = contractStatusLabel(t, order.status);
+            const controlLabel = contractKongykLabel(t, order.kongyk);
+            const buyTimeFull = formatTimestamp(order.buytime);
+            const buyTimeCompact = formatCompactTimestamp(order.buytime);
 
             return (
               <tr key={order.id} className="bg-surface transition hover:bg-surface-elevated">
-                <td className="px-4 py-3 text-muted">{order.id}</td>
-                <td className="px-4 py-3 font-medium text-foreground">{order.username}</td>
-                <td className="px-4 py-3 uppercase text-foreground">{order.coinname}</td>
-                <td className="px-4 py-3 text-foreground">{order.num}</td>
-                <td className="px-4 py-3 text-muted">{contractHyzdLabel(t, order.hyzd)}</td>
-                <td className="px-4 py-3">
+                <AnnotatedCell
+                  label={t("common.username")}
+                  className={`${fitCell} font-medium text-foreground`}
+                >
+                  <span className="break-all">{order.username}</span>
+                </AnnotatedCell>
+                <AnnotatedCell label={t("common.coin")} className={`${fitCell} uppercase text-foreground`}>
+                  {order.coinname}
+                </AnnotatedCell>
+                <AnnotatedCell label={t("common.amount")} className={`${fitCell} text-foreground tabular-nums`}>
+                  {order.num}
+                </AnnotatedCell>
+                <AnnotatedCell label={t("common.direction")} className={fitCell}>
+                  <DirectionBadge hyzd={order.hyzd} />
+                </AnnotatedCell>
+                <AnnotatedCell label={t("common.control")} className={fitCell}>
                   <span
-                    className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${kongykStatusClass(order.kongyk)}`}
+                    className={`inline-flex whitespace-nowrap rounded px-2 py-0.5 text-xs font-medium ${kongykStatusClass(order.kongyk)}`}
                   >
-                    {contractKongykLabel(t, order.kongyk)}
+                    {controlLabel}
                   </span>
-                </td>
-                <td className="px-4 py-3 text-muted">{contractStatusLabel(t, order.status)}</td>
-                <td className="px-4 py-3 text-muted">{formatTimestamp(order.buytime)}</td>
-                <td className="px-4 py-3">
-                  <div className="flex flex-wrap gap-2">
-                    <button
-                      type="button"
-                      disabled={isBusy}
-                      onClick={() => onSetWinLoss(order, 1)}
-                      className="rounded bg-success px-2.5 py-1 text-xs font-medium text-background transition hover:opacity-90 disabled:opacity-40"
-                    >
-                      {t("action.win")}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isBusy}
-                      onClick={() => onSetWinLoss(order, 2)}
-                      className="rounded border border-danger px-2.5 py-1 text-xs font-medium text-danger transition hover:bg-danger/10 disabled:opacity-40"
-                    >
-                      {t("action.loss")}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isBusy}
-                      onClick={() => onSetWinLoss(order, 0)}
-                      className="rounded border border-border px-2.5 py-1 text-xs font-medium text-muted transition hover:bg-surface-elevated disabled:opacity-40"
-                    >
-                      {t("action.normal")}
-                    </button>
-                    <button
-                      type="button"
-                      disabled={isBusy}
-                      onClick={() => onSettle(order)}
-                      className="rounded bg-primary px-2.5 py-1 text-xs font-medium text-background transition hover:opacity-90 disabled:opacity-40"
-                    >
-                      {t("action.settleOrder")}
-                    </button>
-                  </div>
-                </td>
+                </AnnotatedCell>
+                <AnnotatedCell label={t("common.status")} className={`${fitCell} text-muted`}>
+                  <span className="whitespace-nowrap">{statusLabel}</span>
+                </AnnotatedCell>
+                <AnnotatedCell
+                  label={t("common.buyTime")}
+                  className={`${fitCell} text-muted tabular-nums`}
+                >
+                  <span className="whitespace-nowrap" title={buyTimeFull}>
+                    {buyTimeCompact}
+                  </span>
+                </AnnotatedCell>
+                <AnnotatedCell label={t("common.actions")} actions>
+                  <OrderActions
+                    order={order}
+                    isBusy={isBusy}
+                    onSetWinLoss={onSetWinLoss}
+                    onSettle={onSettle}
+                  />
+                </AnnotatedCell>
               </tr>
             );
           })}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

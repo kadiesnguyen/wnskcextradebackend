@@ -8,7 +8,6 @@ import {
 } from "@/components/list/ListPageParts";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { ActionButton } from "@/components/actions";
 import { contractKongykLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import Link from "next/link";
@@ -19,6 +18,11 @@ import { ContractOrderListSkeleton } from "./ContractOrderListSkeleton";
 import { useContractOrderActions } from "./useContractOrderActions";
 import { useContractOrders } from "./useContractOrders";
 import type { ContractOrder } from "./types";
+import { ContractQueuePanelContainer } from "@/features/trading/queue/ContractQueuePanelContainer";
+import {
+  ContractQueueQuickActions,
+  contractOpsButtonClass,
+} from "@/features/trading/queue/ContractQueueQuickActions";
 
 type PendingAction = {
   order: ContractOrder;
@@ -36,11 +40,7 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
   const searchParams = useSearchParams();
 
   const page = Number(searchParams.get("page") ?? "1");
-  const username = searchParams.get("username") ?? "";
-  const hyzd = searchParams.get("hyzd") ?? "";
 
-  const [usernameInput, setUsernameInput] = useState(username);
-  const [hyzdInput, setHyzdInput] = useState(hyzd);
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [pendingSettle, setPendingSettle] = useState<ContractOrder | null>(null);
   const [pendingSettleStuck, setPendingSettleStuck] = useState(false);
@@ -54,10 +54,8 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
         : {
             page: page > 0 ? page : 1,
             per_page: 15,
-            username: username || undefined,
-            hyzd: hyzd ? Number(hyzd) : undefined,
           },
-    [embedded, page, username, hyzd],
+    [embedded, page],
   );
 
   const { data, isLoading, isError, error, refetch, isFetching } = useContractOrders(queryParams);
@@ -77,15 +75,6 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
     },
     [pathname, router, searchParams],
   );
-
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
-    updateParams({
-      username: usernameInput.trim() || null,
-      hyzd: hyzdInput || null,
-      page: "1",
-    });
-  };
 
   const handleConfirm = async () => {
     if (!pendingAction) return;
@@ -148,17 +137,18 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
     : "";
 
   const settleStuckButton = (
-    <ActionButton
-      variant="primary"
+    <button
+      type="button"
       disabled={settleStuck.isPending}
       onClick={() => {
         setActionError(null);
         setActionSuccess(null);
         setPendingSettleStuck(true);
       }}
+      className={`${contractOpsButtonClass} bg-primary text-[var(--color-on-primary)]`}
     >
       {t("action.settleStuckOrders")}
-    </ActionButton>
+    </button>
   );
 
   const listContent = (
@@ -193,6 +183,7 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
           <ContractOrderList
             orders={orders}
             pendingActionId={pendingActionId}
+            embedded={embedded}
             onSetWinLoss={(order, kongyk) => {
               setActionError(null);
               setPendingAction({ order, kongyk });
@@ -217,12 +208,13 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
   if (embedded) {
     return (
       <section aria-label={t("page.dashboard.contractOrders")} className="space-y-4">
-        <div className="flex items-start justify-between gap-4">
-          <div>
+        <div className="flex flex-col gap-3 sm:flex-row sm:items-start sm:justify-between">
+          <div className="min-w-0">
             <h2 className="text-base font-semibold text-foreground">{t("page.dashboard.contractOrders")}</h2>
             <p className="mt-0.5 text-sm text-muted">{t("page.dashboard.contractOrdersHint")}</p>
           </div>
-          <div className="flex shrink-0 items-center gap-3">
+          <div className="flex shrink-0 flex-wrap items-center gap-2 sm:justify-end">
+            <ContractQueueQuickActions />
             {settleStuckButton}
             <Link
               href="/trading/orders"
@@ -298,49 +290,15 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
         action={settleStuckButton}
       />
 
-      <form
-        onSubmit={handleSearch}
-        className="flex flex-col gap-3 rounded-lg border border-border bg-surface p-4 sm:flex-row sm:items-end"
-        role="search"
-        aria-label={t("page.orders.filterLabel")}
-      >
-        <div className="flex-1">
-          <label htmlFor="order-search" className="block text-sm font-medium text-foreground">
-            {t("common.username")}
-          </label>
-          <input
-            id="order-search"
-            type="search"
-            value={usernameInput}
-            onChange={(e) => setUsernameInput(e.target.value)}
-            placeholder={t("common.searchByUsername")}
-            className="mt-1 w-full rounded border border-border bg-surface-elevated px-3 py-2 text-sm text-foreground placeholder:text-muted"
-          />
-        </div>
-        <div className="sm:w-48">
-          <label htmlFor="order-direction" className="block text-sm font-medium text-foreground">
-            {t("common.direction")}
-          </label>
-          <select
-            id="order-direction"
-            value={hyzdInput}
-            onChange={(e) => setHyzdInput(e.target.value)}
-            className="mt-1 w-full rounded border border-border bg-surface-elevated px-3 py-2 text-sm text-foreground"
-          >
-            <option value="">{t("common.all")}</option>
-            <option value="1">{t("page.orders.buyIncrease")}</option>
-            <option value="2">{t("page.orders.buyDecrease")}</option>
-          </select>
-        </div>
-        <button
-          type="submit"
-          className="rounded bg-primary px-4 py-2 text-sm font-medium text-background transition hover:opacity-90"
-        >
-          {t("common.search")}
-        </button>
-      </form>
-
       {listContent}
+
+      <section
+        aria-labelledby="result-queue-heading"
+        className="space-y-4 rounded-xl border border-border bg-surface p-4 md:p-6"
+      >
+        <ContractQueuePanelContainer embedded part="actions" />
+        <ContractQueuePanelContainer embedded part="table" />
+      </section>
 
       <ConfirmDialog
         isOpen={pendingAction !== null}

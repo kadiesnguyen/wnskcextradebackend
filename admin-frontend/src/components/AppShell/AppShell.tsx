@@ -1,4 +1,5 @@
 import type { AdminMenuTree, AdminUser } from "@/features/auth/types";
+import { ContractOrderAlert } from "@/features/trading/orders/contract-order-alert/ContractOrderAlert";
 import { AppShellHeader } from "./AppShellHeader";
 import { AppShellSidebar } from "./AppShellSidebar";
 
@@ -14,10 +15,11 @@ export function AppShell({ user, menuTree, children }: AppShellProps) {
       <AppShellSidebar menuTree={menuTree} />
       <div className="flex min-w-0 flex-1 flex-col">
         <AppShellHeader user={user} />
-        <main id="main-content" className="flex-1 overflow-auto p-4 md:p-6">
+        <main id="main-content" className="min-w-0 flex-1 overflow-x-hidden overflow-y-auto p-4 md:p-6">
           {children}
         </main>
       </div>
+      <ContractOrderAlert />
     </div>
   );
 }

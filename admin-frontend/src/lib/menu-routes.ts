@@ -30,6 +30,7 @@ export const MENU_ROUTE_MAP: Record<string, MenuRouteEntry> = {
   "Finance/fund": { path: "/finance/transfers", labelKey: "nav.transfers" },
   "Trade/index": { path: "/trading/orders", labelKey: "nav.orders" },
   "Trade/sethy": { path: "/trading/settings", labelKey: "nav.contractSettings" },
+  "Trade/resultqueue": { path: "/trading/queue", labelKey: "nav.queue" },
   "Trade/tyorder": { path: "/trading/trial-orders", labelKey: "nav.trialOrders" },
   "Trade/hylog": { path: "/trading/close-history", labelKey: "nav.closeHistory" },
   "Trade/bbsetting": { path: "/trading/spot-settings", labelKey: "nav.spotSettings" },
@@ -72,15 +73,60 @@ export const GROUP_LABEL_KEYS: Record<string, string> = {
   "Development Group": "group.developmentGroup",
 };
 
+/** Sidebar section order (merged groups are omitted). */
+export const SIDEBAR_GROUP_ORDER = [
+  "Quick Actions",
+  "User Management",
+  "Quick Contract",
+  "Financial Management",
+  "Miner Management",
+  "New Purchase Management",
+  "System",
+] as const;
+
+/** Legacy ThinkPHP groups folded into other sections — no standalone header. */
+export const MERGED_AWAY_GROUPS = new Set([
+  "Pair Trading",
+  "Robot Configuration",
+  "Quick Trading",
+  "Content",
+  "Navigation",
+  "Website Configuration",
+  "Development Group",
+]);
+
+/** Move menu entries into Hợp đồng nhanh (Quick Contract). */
+export const MENU_URL_TARGET_GROUP: Record<string, string> = {
+  "Trade/bbsetting": "Quick Contract",
+  "Trade/bbsjlist": "Quick Contract",
+  "Trade/bbxjlist": "Quick Contract",
+  "Trade/hylog": "Quick Contract",
+  "Trade/market": "Quick Contract",
+};
+
+/** Item order inside Hợp đồng nhanh. */
+export const QUICK_CONTRACT_ITEM_ORDER = [
+  "Trade/index",
+  "Trade/sethy",
+  "Trade/bbsetting",
+  "Trade/bbsjlist",
+  "Trade/bbxjlist",
+  "Trade/hylog",
+  "Trade/market",
+];
+
 /** ThinkPHP menu URLs hidden from the Next.js sidebar. */
 export const HIDDEN_MENU_URLS = new Set([
   "User/online",
   "User/noticelist",
   "Trade/tyorder",
+  "Trade/resultqueue",
   "News/index",
   "Article/index",
   "Config/daohang",
   "Config/dhfooter",
+  "Issue/log",
+  "Index/index",
 ]);
 
 /** Sidebar paths that show a pending-count badge. */
@@ -106,6 +152,96 @@ export function resolveGroupLabelKey(groupName: string): string {
   return GROUP_LABEL_KEYS[groupName] ?? groupName;
 }
 
+type IndexedMenuItem = {
+  item: ApiMenuItem;
+  sourceGroup: string;
+  order: number;
+};
+
+function isVisibleMenuItem(item: ApiMenuItem): boolean {
+  const url = normalizeMenuUrl(item.url);
+  if (HIDDEN_MENU_URLS.has(url)) {
+    return false;
+  }
+  const path = resolveMenuPath(item.url);
+  if (!path) {
+    return false;
+  }
+  return true;
+}
+
+function targetGroupForItem(url: string, sourceGroup: string): string | null {
+  const normalized = normalizeMenuUrl(url);
+  if (MENU_URL_TARGET_GROUP[normalized]) {
+    return MENU_URL_TARGET_GROUP[normalized];
+  }
+  if (MERGED_AWAY_GROUPS.has(sourceGroup)) {
+    return null;
+  }
+  if (!SIDEBAR_GROUP_ORDER.includes(sourceGroup as (typeof SIDEBAR_GROUP_ORDER)[number])) {
+    return null;
+  }
+  return sourceGroup;
+}
+
+function sortQuickContractItems(items: ApiMenuItem[]): ApiMenuItem[] {
+  const orderIndex = (url: string) => {
+    const index = QUICK_CONTRACT_ITEM_ORDER.indexOf(normalizeMenuUrl(url));
+    return index === -1 ? QUICK_CONTRACT_ITEM_ORDER.length : index;
+  };
+
+  return [...items].sort((a, b) => orderIndex(a.url) - orderIndex(b.url));
+}
+
+function sortGroupItems(groupName: string, items: ApiMenuItem[]): ApiMenuItem[] {
+  if (groupName === "Quick Contract") {
+    return sortQuickContractItems(items);
+  }
+  return items;
+}
+
+function restructureMenuTree(source: AdminMenuTree): AdminMenuTree["child"] {
+  const grouped = new Map<string, Map<string, IndexedMenuItem>>();
+  let order = 0;
+
+  for (const [sourceGroup, items] of Object.entries(source.child)) {
+    for (const item of items) {
+      if (!isVisibleMenuItem(item)) {
+        continue;
+      }
+
+      const targetGroup = targetGroupForItem(item.url, sourceGroup);
+      if (!targetGroup) {
+        continue;
+      }
+
+      const urlKey = normalizeMenuUrl(item.url);
+      const bucket = grouped.get(targetGroup) ?? new Map<string, IndexedMenuItem>();
+      if (!bucket.has(urlKey)) {
+        bucket.set(urlKey, { item, sourceGroup, order: order++ });
+      }
+      grouped.set(targetGroup, bucket);
+    }
+  }
+
+  const child: AdminMenuTree["child"] = {};
+
+  for (const groupName of SIDEBAR_GROUP_ORDER) {
+    const bucket = grouped.get(groupName);
+    if (!bucket || bucket.size === 0) {
+      continue;
+    }
+
+    const items = [...bucket.values()]
+      .sort((a, b) => a.order - b.order)
+      .map(({ item }) => item);
+
+    child[groupName] = sortGroupItems(groupName, items);
+  }
+
+  return child;
+}
+
 /** Fallback sidebar when API returns no menus (e.g. admin without RBAC group). */
 export const FALLBACK_MENU_TREE: AdminMenuTree = {
   main: [],
@@ -118,8 +254,6 @@ export const FALLBACK_MENU_TREE: AdminMenuTree = {
       { id: "fb-wallet", title: "Wallets", url: "User/qianbao", slug: "admin.user.qianbao" },
       { id: "fb-assets", title: "Assets", url: "User/coin", slug: "admin.user.coin" },
       { id: "fb-fund", title: "Fund history", url: "User/amountlog", slug: "admin.user.amountlog" },
-      { id: "fb-online", title: "Online support", url: "User/online", slug: "admin.user.online" },
-      { id: "fb-notice", title: "Notices", url: "User/noticelist", slug: "admin.user.noticelist" },
     ],
     "Financial Management": [
       { id: "fb-bills", title: "Bills", url: "Finance/index", slug: "admin.finance.index" },
@@ -130,15 +264,11 @@ export const FALLBACK_MENU_TREE: AdminMenuTree = {
     "Quick Contract": [
       { id: "fb-ord", title: "Orders", url: "Trade/index", slug: "admin.trade.index" },
       { id: "fb-set", title: "Settings", url: "Trade/sethy", slug: "admin.trade.sethy" },
-    ],
-    "Quick Trading": [
-      { id: "fb-trial", title: "Trial orders", url: "Trade/tyorder", slug: "admin.trade.tyorder" },
-      { id: "fb-close", title: "Close history", url: "Trade/hylog", slug: "admin.trade.hylog" },
-    ],
-    "Pair Trading": [
       { id: "fb-spot-set", title: "Spot settings", url: "Trade/bbsetting", slug: "admin.trade.bbsetting" },
       { id: "fb-spot-m", title: "Spot market", url: "Trade/bbsjlist", slug: "admin.trade.bbsjlist" },
       { id: "fb-spot-l", title: "Spot limit", url: "Trade/bbxjlist", slug: "admin.trade.bbxjlist" },
+      { id: "fb-close", title: "Close history", url: "Trade/hylog", slug: "admin.trade.hylog" },
+      { id: "fb-platform", title: "Platform markets", url: "Trade/market", slug: "admin.trade.market" },
     ],
     "New Purchase Management": [
       { id: "fb-stake", title: "Staking", url: "Issue/index", slug: "admin.issue.index" },
@@ -150,10 +280,6 @@ export const FALLBACK_MENU_TREE: AdminMenuTree = {
       { id: "fb-profit", title: "Profits", url: "Kuangm/kjsylist", slug: "admin.kuangm.kjsylist" },
       { id: "fb-exp", title: "Expired", url: "Kuangm/overlist", slug: "admin.kuangm.overlist" },
     ],
-    Content: [
-      { id: "fb-news", title: "News", url: "News/index", slug: "admin.news.index" },
-      { id: "fb-art", title: "Articles", url: "Article/index", slug: "admin.article.index" },
-    ],
     System: [
       { id: "fb-site", title: "Site", url: "Config/index", slug: "admin.config.index" },
       { id: "fb-sys", title: "System", url: "Config/qita", slug: "admin.config.qita" },
@@ -161,8 +287,6 @@ export const FALLBACK_MENU_TREE: AdminMenuTree = {
       { id: "fb-port", title: "Deposit ports", url: "Config/depositport", slug: "admin.config.depositport" },
       { id: "fb-ct", title: "CT markets", url: "Config/ctmarket", slug: "admin.config.ctmarket" },
       { id: "fb-pm", title: "Platform markets", url: "Config/marketo", slug: "admin.config.marketo" },
-      { id: "fb-nav", title: "Navigation", url: "Config/daohang", slug: "admin.config.daohang" },
-      { id: "fb-foot", title: "Footer", url: "Config/dhfooter", slug: "admin.config.dhfooter" },
     ],
   },
 };
@@ -172,14 +296,8 @@ export function resolveMenuTree(menuTree: AdminMenuTree): AdminMenuTree {
     ? menuTree
     : FALLBACK_MENU_TREE;
 
-  const child: AdminMenuTree["child"] = {};
-
-  for (const [groupName, items] of Object.entries(source.child)) {
-    const visible = items.filter((item) => !HIDDEN_MENU_URLS.has(normalizeMenuUrl(item.url)));
-    if (visible.length > 0) {
-      child[groupName] = visible;
-    }
-  }
-
-  return { ...source, child };
+  return {
+    ...source,
+    child: restructureMenuTree(source),
+  };
 }

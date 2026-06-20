@@ -1,7 +1,8 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter } from "@/components/list/ListPageParts";
+import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter } from "@/components/list/ListPageParts"
+import { transferStatusLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { TransferListSkeleton } from "./TransferListSkeleton";
@@ -35,13 +36,19 @@ export function TransferListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username}</td>
-                <td className="px-4 py-3">{item.from_coin?.toUpperCase()} {item.from_amount}</td>
-                <td className="px-4 py-3">{item.to_coin?.toUpperCase()} {item.to_amount}</td>
-                <td className="px-4 py-3">{item.convert_rate}</td>
-                <td className="px-4 py-3">{item.status_label}</td>
-                <td className="px-4 py-3">{item.addtime}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username}</DataTableCell>
+                <DataTableCell columnKey="from">
+                  {item.from_coin?.toUpperCase()} {item.from_amount}
+                </DataTableCell>
+                <DataTableCell columnKey="to">
+                  {item.to_coin?.toUpperCase()} {item.to_amount}
+                </DataTableCell>
+                <DataTableCell columnKey="amount">{item.convert_rate}</DataTableCell>
+                <DataTableCell columnKey="status_label">
+                  {transferStatusLabel(t, item.status)}
+                </DataTableCell>
+                <DataTableCell columnKey="addtime">{item.addtime}</DataTableCell>
               </tr>
             ))}
           </DataTable>

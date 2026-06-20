@@ -1,9 +1,10 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ActionButton, RowActions, ToolbarActions, useRowSelection } from "@/components/actions";
-import { ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts";
+import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { walletStatusLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { WalletListSkeleton } from "./WalletListSkeleton";
@@ -57,11 +58,11 @@ export function WalletListContainer() {
             {items.map((item) => (
               <tr key={item.id}>
                 <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username ?? "—"}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username ?? "—"}</DataTableCell>
                 <td className="px-4 py-3">{item.coinname?.toUpperCase() ?? item.name}</td>
                 <td className="px-4 py-3">{item.addr}</td>
-                <td className="px-4 py-3">{item.status_label}</td>
+                <td className="px-4 py-3">{walletStatusLabel(t, item.status)}</td>
                 <ActionsCell><RowActions><ActionButton onClick={() => openEdit(item)}>{t("common.edit")}</ActionButton></RowActions></ActionsCell>
               </tr>
             ))}

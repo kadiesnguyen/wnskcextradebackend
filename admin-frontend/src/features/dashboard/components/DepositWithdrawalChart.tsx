@@ -27,11 +27,11 @@ export function DepositWithdrawalChart({ data }: DepositWithdrawalChartProps) {
   return (
     <div className="flex h-full flex-col">
       <div className="mb-2 flex items-center gap-4 px-1">
-        <span className="flex items-center gap-1.5 text-[11px] text-muted">
+        <span className="flex items-center gap-1.5 text-xs text-muted">
           <span className="inline-block h-2 w-2 rounded-sm bg-success" />
           {t("page.dashboard.legend.deposit")}
         </span>
-        <span className="flex items-center gap-1.5 text-[11px] text-muted">
+        <span className="flex items-center gap-1.5 text-xs text-muted">
           <span className="inline-block h-2 w-2 rounded-sm bg-danger" />
           {t("page.dashboard.legend.withdrawal")}
         </span>
@@ -78,7 +78,7 @@ export function DepositWithdrawalChart({ data }: DepositWithdrawalChartProps) {
                 y={CHART_HEIGHT - 6}
                 textAnchor="middle"
                 fill="var(--color-text-muted)"
-                fontSize="9"
+                fontSize="12"
               >
                 {formatShortDate(d.date).replace(" ", "")}
               </text>

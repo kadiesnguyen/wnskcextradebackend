@@ -1,3 +1,8 @@
+"use client";
+
+import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
+import { activeInactiveLabel, onOffLabel } from "@/lib/i18n/entity-labels";
+import { useI18n } from "@/lib/i18n/useI18n";
 import { marketStatusClass } from "../lib/format";
 import type { TradingMarket } from "./types";
 
@@ -8,31 +13,33 @@ type ContractMarketsListProps = {
 };
 
 export function ContractMarketsList({ markets, editingId, onEdit }: ContractMarketsListProps) {
+  const { t } = useI18n();
+
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell>
+      <table className={tableClassName}>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">
-              ID
+            <th scope="col" className={thClassName}>
+              {t("common.id")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Name
+            <th scope="col" className={thClassName}>
+              {t("page.contractSettings.marketName")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Round
+            <th scope="col" className={thClassName}>
+              {t("page.contractSettings.round")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Price
+            <th scope="col" className={thClassName}>
+              {t("page.contractSettings.marketPrice")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Trade
+            <th scope="col" className={thClassName}>
+              {t("page.contractSettings.marketTrade")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Status
+            <th scope="col" className={thClassName}>
+              {t("common.status")}
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
-              Actions
+            <th scope="col" className={thClassName}>
+              {t("common.actions")}
             </th>
           </tr>
         </thead>
@@ -46,12 +53,12 @@ export function ContractMarketsList({ markets, editingId, onEdit }: ContractMark
               <td className="px-4 py-3 font-medium uppercase text-foreground">{market.name}</td>
               <td className="px-4 py-3 text-muted">{market.round}</td>
               <td className="px-4 py-3 text-foreground">{market.new_price ?? "—"}</td>
-              <td className="px-4 py-3 text-muted">{Number(market.trade) === 1 ? "On" : "Off"}</td>
+              <td className="px-4 py-3 text-muted">{onOffLabel(t, Number(market.trade) === 1)}</td>
               <td className="px-4 py-3">
                 <span
                   className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${marketStatusClass(market.status)}`}
                 >
-                  {Number(market.status) === 1 ? "Active" : "Inactive"}
+                  {activeInactiveLabel(t, Number(market.status) === 1)}
                 </span>
               </td>
               <td className="px-4 py-3">
@@ -60,13 +67,13 @@ export function ContractMarketsList({ markets, editingId, onEdit }: ContractMark
                   onClick={() => onEdit(market)}
                   className="rounded border border-border px-2.5 py-1 text-xs font-medium text-foreground transition hover:bg-surface-elevated"
                 >
-                  Edit
+                  {t("common.edit")}
                 </button>
               </td>
             </tr>
           ))}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

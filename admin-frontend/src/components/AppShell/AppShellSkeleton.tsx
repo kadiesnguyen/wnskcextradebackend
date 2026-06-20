@@ -5,7 +5,7 @@ export function AppShellSkeleton() {
       aria-busy="true"
       aria-label="Loading admin dashboard"
     >
-      <div className="hidden w-56 shrink-0 border-r border-border bg-surface p-4 md:block">
+      <div className="hidden w-80 shrink-0 border-r border-border bg-surface p-4 md:block">
         <div className="skeleton mb-4 h-6 w-24" />
         <div className="space-y-2">
           {Array.from({ length: 5 }).map((_, index) => (

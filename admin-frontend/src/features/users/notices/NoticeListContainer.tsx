@@ -3,15 +3,13 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton, ToolbarActions, useRowSelection } from "@/components/actions";
-import {
-  DataTable,
+import { DataTableCell, DataTable,
   EmptyState,
   PageHeader,
   PageMetaBar,
   PaginationNav,
   RowCheckbox,
-  UsernameFilter,
-} from "@/components/list/ListPageParts";
+  UsernameFilter, } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
@@ -172,7 +170,7 @@ export function NoticeListContainer({
                     onChange={() => selection.toggleOne(item.id)}
                   />
                 </td>
-                <td className="px-4 py-3">{item.id}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
                 <td className="px-4 py-3 font-medium">{item.account}</td>
                 <td className="px-4 py-3">{item.title}</td>
                 <td className="px-4 py-3 max-w-xs text-sm text-muted">{truncate(item.content)}</td>

@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter } from "@/components/list/ListPageParts";
+import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter } from "@/components/list/ListPageParts"
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { FrozenProfitListSkeleton } from "./FrozenProfitListSkeleton";
@@ -23,7 +23,7 @@ export function FrozenProfitListContainer() {
       {isLoading ? <FrozenProfitListSkeleton /> : null}
       {isError ? <ErrorState message={error instanceof Error ? error.message : t("common.loadFailed")} retry={() => refetch()} /> : null}
       {!isLoading && !isError && items.length === 0 ? <EmptyState titleKey="page.frozenProfits.noResults" descriptionKey="common.noResultsHint" /> : null}
-      {!isLoading && !isError && items.length > 0 ? (<><PageMetaBar meta={meta} isFetching={isFetching} /><DataTable columns={[{ key: "id", label: t("common.id") }, { key: "username", label: t("common.username") }, { key: "detail", label: "Detail" }, { key: "amount", label: t("common.amount") }, { key: "addtime", label: t("common.time") }]}>{items.map((item) => (<tr key={item.id}><td className="px-4 py-3">{item.id}</td><td className="px-4 py-3">{item.username}</td><td className="px-4 py-3">{item.kjtitle ?? item.ktitle ?? item.status_label ?? "—"}</td><td className="px-4 py-3">{item.num ?? "—"} {item.coin ?? ""}</td><td className="px-4 py-3">{item.addtime}</td></tr>))}</DataTable>{meta ? <PaginationNav meta={meta} onPageChange={(p) => updateParams({ page: String(p) })} isFetching={isFetching} /> : null}</>) : null}
+      {!isLoading && !isError && items.length > 0 ? (<><PageMetaBar meta={meta} isFetching={isFetching} /><DataTable columns={[{ key: "id", label: t("common.id") }, { key: "username", label: t("common.username") }, { key: "detail", label: "Detail" }, { key: "amount", label: t("common.amount") }, { key: "addtime", label: t("common.time") }]}>{items.map((item) => (<tr key={item.id}><DataTableCell columnKey="id">{item.id}</DataTableCell><DataTableCell columnKey="username">{item.username}</DataTableCell><DataTableCell columnKey="detail">{item.kjtitle ?? item.ktitle ?? item.status_label ?? "—"}</DataTableCell><DataTableCell columnKey="amount">{item.num ?? "—"} {item.coin ?? ""}</DataTableCell><DataTableCell columnKey="addtime">{item.addtime}</DataTableCell></tr>))}</DataTable>{meta ? <PaginationNav meta={meta} onPageChange={(p) => updateParams({ page: String(p) })} isFetching={isFetching} /> : null}</>) : null}
     </div>
   );
 }

@@ -1,3 +1,4 @@
+import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { formatTimestamp } from "@/features/finance/lib/format";
 import type { AdminStakingLog } from "./types";
 
@@ -11,35 +12,35 @@ function statusClass(status: number): string {
 
 export function StakingLogList({ logs }: StakingLogListProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell>
+      <table className={tableClassName}>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               ID
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Account
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Package
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Amount
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Days
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Rate
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Status
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Started
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Ends
             </th>
           </tr>
@@ -66,6 +67,6 @@ export function StakingLogList({ logs }: StakingLogListProps) {
           ))}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

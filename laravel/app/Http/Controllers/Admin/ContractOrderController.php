@@ -49,16 +49,23 @@ class ContractOrderController extends Controller
      */
     public function pendingCount(): JsonResponse
     {
-        $count = Hyorder::query()
+        $query = Hyorder::query()
             ->where('status', 1)
-            ->where('tznum', 0)
-            ->count();
+            ->where('tznum', 0);
+
+        $count = (clone $query)->count();
+
+        $orders = (clone $query)
+            ->orderByDesc('id')
+            ->limit(5)
+            ->get();
 
         $payload = [
             'status' => true,
             'data' => [
                 'count' => $count,
                 'has_new' => $count > 0,
+                'orders' => ContractOrderResource::collection($orders),
             ],
         ];
 

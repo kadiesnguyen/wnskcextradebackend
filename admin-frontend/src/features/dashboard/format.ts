@@ -33,6 +33,20 @@ export function formatTimestamp(ts: number | string): string {
   }).format(date);
 }
 
+/** Compact timestamp for dashboard tables (saves horizontal space). */
+export function formatDashboardTimestamp(ts: number | string): string {
+  const date = typeof ts === "number" ? new Date(ts * 1000) : new Date(ts);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+  return new Intl.DateTimeFormat(undefined, {
+    day: "2-digit",
+    month: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+  }).format(date);
+}
+
 export function formatRelativeTime(ts: number): string {
   const diff = Date.now() - ts * 1000;
   const minutes = Math.floor(diff / 60_000);

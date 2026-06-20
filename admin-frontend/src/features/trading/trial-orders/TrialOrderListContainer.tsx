@@ -1,8 +1,9 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ActionButton, RowActions } from "@/components/actions";
-import { ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts";
+import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
 import { ErrorState } from "@/components/ui/ErrorState";
+import { contractStatusLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { TrialOrderListSkeleton } from "./TrialOrderListSkeleton";
@@ -37,11 +38,11 @@ export function TrialOrderListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username}</DataTableCell>
                 <td className="px-4 py-3">{item.coinname?.toUpperCase()}</td>
                 <td className="px-4 py-3">{item.num}</td>
-                <td className="px-4 py-3">{item.status_label}</td>
+                <td className="px-4 py-3">{contractStatusLabel(t, item.status)}</td>
                 <td className="px-4 py-3">{item.buytime ?? item.addtime ?? "—"}</td>
                 <ActionsCell><RowActions><ActionButton onClick={() => setViewItem(item as unknown as Record<string, unknown>)}>{t("action.check")}</ActionButton></RowActions></ActionsCell>
               </tr>

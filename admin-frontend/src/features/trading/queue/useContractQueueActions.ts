@@ -1,8 +1,12 @@
 "use client";
 
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-import { contractQueueAction } from "./api";
-import type { QueueAction } from "./types";
+import {
+  contractQueueAction,
+  deleteContractQueueEntry,
+  updateContractQueueEntry,
+} from "./api";
+import type { QueueAction, UpdateQueueEntryPayload } from "./types";
 
 export function useContractQueueActions() {
   const queryClient = useQueryClient();
@@ -16,5 +20,16 @@ export function useContractQueueActions() {
     onSuccess: invalidate,
   });
 
-  return { action };
+  const updateEntry = useMutation({
+    mutationFn: ({ id, payload }: { id: number; payload: UpdateQueueEntryPayload }) =>
+      updateContractQueueEntry(id, payload),
+    onSuccess: invalidate,
+  });
+
+  const deleteEntry = useMutation({
+    mutationFn: (id: number) => deleteContractQueueEntry(id),
+    onSuccess: invalidate,
+  });
+
+  return { action, updateEntry, deleteEntry };
 }

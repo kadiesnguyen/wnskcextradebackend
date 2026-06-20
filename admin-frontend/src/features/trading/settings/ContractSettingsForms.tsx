@@ -1,5 +1,6 @@
 "use client";
 
+import { useI18n } from "@/lib/i18n/useI18n";
 import type { ContractSetting, MarketFormMeta, TradingMarket, UpsertMarketPayload } from "./types";
 
 const inputClass =
@@ -20,6 +21,8 @@ export function ContractSettingsForm({
   saveSuccess,
   onSave,
 }: ContractSettingsFormProps) {
+  const { t } = useI18n();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
@@ -37,15 +40,15 @@ export function ContractSettingsForm({
     <form
       onSubmit={handleSubmit}
       className="rounded-lg border border-border bg-surface p-4"
-      aria-label="Contract settings form"
+      aria-label={t("page.contractSettings.formTitle")}
     >
-      <h2 className="text-sm font-medium text-foreground">Contract settings</h2>
-      <p className="mt-1 text-xs text-muted">Fee rates, time frames, and trading limits.</p>
+      <h2 className="text-sm font-medium text-foreground">{t("page.contractSettings.formTitle")}</h2>
+      <p className="mt-1 text-xs text-muted">{t("page.contractSettings.formHint")}</p>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
         <div>
           <label htmlFor="hy_sxf" className="block text-sm font-medium text-foreground">
-            Fee rate (hy_sxf)
+            {t("page.contractSettings.field.hy_sxf")}
           </label>
           <input
             id="hy_sxf"
@@ -58,7 +61,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_time" className="block text-sm font-medium text-foreground">
-            Time frames (hy_time)
+            {t("page.contractSettings.field.hy_time")}
           </label>
           <input
             id="hy_time"
@@ -72,7 +75,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_ykbl" className="block text-sm font-medium text-foreground">
-            Profit ratio (hy_ykbl)
+            {t("page.contractSettings.field.hy_ykbl")}
           </label>
           <input
             id="hy_ykbl"
@@ -85,7 +88,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_tzed" className="block text-sm font-medium text-foreground">
-            Investment tiers (hy_tzed)
+            {t("page.contractSettings.field.hy_tzed")}
           </label>
           <input
             id="hy_tzed"
@@ -98,7 +101,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_min" className="block text-sm font-medium text-foreground">
-            Minimum amount (hy_min)
+            {t("page.contractSettings.field.hy_min")}
           </label>
           <input
             id="hy_min"
@@ -111,7 +114,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_kstime" className="block text-sm font-medium text-foreground">
-            Start time (hy_kstime)
+            {t("page.contractSettings.field.hy_kstime")}
           </label>
           <input
             id="hy_kstime"
@@ -124,7 +127,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_min_per_frame" className="block text-sm font-medium text-foreground">
-            Min per frame
+            {t("page.contractSettings.field.hy_min_per_frame")}
           </label>
           <input
             id="hy_min_per_frame"
@@ -136,7 +139,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_max_per_frame" className="block text-sm font-medium text-foreground">
-            Max per frame
+            {t("page.contractSettings.field.hy_max_per_frame")}
           </label>
           <input
             id="hy_max_per_frame"
@@ -148,7 +151,7 @@ export function ContractSettingsForm({
         </div>
         <div>
           <label htmlFor="hy_fkgl" className="block text-sm font-medium text-foreground">
-            Risk control (hy_fkgl)
+            {t("page.contractSettings.field.hy_fkgl")}
           </label>
           <input
             id="hy_fkgl"
@@ -177,7 +180,7 @@ export function ContractSettingsForm({
           disabled={isSaving}
           className="rounded bg-primary px-4 py-2 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-40"
         >
-          {isSaving ? "Saving…" : "Save settings"}
+          {isSaving ? t("common.saving") : t("page.contractSettings.save")}
         </button>
       </div>
     </form>
@@ -203,6 +206,8 @@ export function ContractMarketForm({
   onSave,
   onCancel,
 }: ContractMarketFormProps) {
+  const { t } = useI18n();
+
   const handleSubmit = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const form = new FormData(e.currentTarget);
@@ -239,10 +244,12 @@ export function ContractMarketForm({
     <form
       onSubmit={handleSubmit}
       className="rounded-lg border border-border bg-surface p-4"
-      aria-label={isCreating ? "Create market form" : "Edit market form"}
+      aria-label={isCreating ? t("page.contractSettings.createMarket") : t("page.contractSettings.editMarket", { name: market?.name ?? "" })}
     >
       <h2 className="text-sm font-medium text-foreground">
-        {isCreating ? "Create market" : `Edit market: ${market?.name}`}
+        {isCreating
+          ? t("page.contractSettings.createMarket")
+          : t("page.contractSettings.editMarket", { name: market?.name ?? "" })}
       </h2>
 
       <div className="mt-4 grid gap-4 sm:grid-cols-2">
@@ -250,7 +257,7 @@ export function ContractMarketForm({
           <>
             <div>
               <label htmlFor="sellname" className="block text-sm font-medium text-foreground">
-                Base coin (sellname)
+                {t("page.contractSettings.baseCoin")}
               </label>
               <select
                 id="sellname"
@@ -260,7 +267,7 @@ export function ContractMarketForm({
                 className={inputClass}
               >
                 <option value="" disabled>
-                  Select coin
+                  {t("page.contractSettings.selectCoin")}
                 </option>
                 {formMeta?.coins.map((coin) => (
                   <option key={coin.name} value={coin.name}>
@@ -271,7 +278,7 @@ export function ContractMarketForm({
             </div>
             <div>
               <label htmlFor="buyname" className="block text-sm font-medium text-foreground">
-                Quote coin (buyname)
+                {t("page.contractSettings.quoteCoin")}
               </label>
               <select
                 id="buyname"
@@ -281,7 +288,7 @@ export function ContractMarketForm({
                 className={inputClass}
               >
                 <option value="" disabled>
-                  Select coin
+                  {t("page.contractSettings.selectCoin")}
                 </option>
                 {formMeta?.coins.map((coin) => (
                   <option key={coin.name} value={coin.name}>
@@ -292,7 +299,7 @@ export function ContractMarketForm({
             </div>
             <div>
               <label htmlFor="jiaoyiqu" className="block text-sm font-medium text-foreground">
-                Trading area
+                {t("page.contractSettings.tradingArea")}
               </label>
               <select
                 id="jiaoyiqu"
@@ -310,13 +317,16 @@ export function ContractMarketForm({
           </>
         ) : (
           <div className="sm:col-span-2 text-sm text-muted">
-            Pair: {base.toUpperCase()} / {quote.toUpperCase()}
+            {t("page.contractSettings.pair", {
+              base: base.toUpperCase(),
+              quote: quote.toUpperCase(),
+            })}
           </div>
         )}
 
         <div>
           <label htmlFor="round" className="block text-sm font-medium text-foreground">
-            Round
+            {t("page.contractSettings.round")}
           </label>
           <select
             id="round"
@@ -334,53 +344,53 @@ export function ContractMarketForm({
         </div>
         <div>
           <label htmlFor="status" className="block text-sm font-medium text-foreground">
-            Status
+            {t("common.status")}
           </label>
           <select id="status" name="status" defaultValue={String(market?.status ?? "1")} className={inputClass}>
-            <option value="1">Active</option>
-            <option value="0">Inactive</option>
+            <option value="1">{t("common.active")}</option>
+            <option value="0">{t("common.inactive")}</option>
           </select>
         </div>
         <div>
           <label htmlFor="fee_buy" className="block text-sm font-medium text-foreground">
-            Buy fee
+            {t("page.contractSettings.buyFee")}
           </label>
           <input id="fee_buy" name="fee_buy" type="text" defaultValue={market?.fee_buy ?? ""} className={inputClass} />
         </div>
         <div>
           <label htmlFor="fee_sell" className="block text-sm font-medium text-foreground">
-            Sell fee
+            {t("page.contractSettings.sellFee")}
           </label>
           <input id="fee_sell" name="fee_sell" type="text" defaultValue={market?.fee_sell ?? ""} className={inputClass} />
         </div>
         <div>
           <label htmlFor="buy_min" className="block text-sm font-medium text-foreground">
-            Buy min
+            {t("page.contractSettings.buyMin")}
           </label>
           <input id="buy_min" name="buy_min" type="text" defaultValue={market?.buy_min ?? ""} className={inputClass} />
         </div>
         <div>
           <label htmlFor="buy_max" className="block text-sm font-medium text-foreground">
-            Buy max
+            {t("page.contractSettings.buyMax")}
           </label>
           <input id="buy_max" name="buy_max" type="text" defaultValue={market?.buy_max ?? ""} className={inputClass} />
         </div>
         <div>
           <label htmlFor="trade" className="block text-sm font-medium text-foreground">
-            Trading enabled
+            {t("page.contractSettings.tradingEnabled")}
           </label>
           <select id="trade" name="trade" defaultValue={String(market?.trade ?? "1")} className={inputClass}>
-            <option value="1">On</option>
-            <option value="0">Off</option>
+            <option value="1">{t("common.on")}</option>
+            <option value="0">{t("common.off")}</option>
           </select>
         </div>
         <div>
           <label htmlFor="shuadan" className="block text-sm font-medium text-foreground">
-            Spoof orders
+            {t("page.contractSettings.spoofOrders")}
           </label>
           <select id="shuadan" name="shuadan" defaultValue={String(market?.shuadan ?? "0")} className={inputClass}>
-            <option value="1">On</option>
-            <option value="0">Off</option>
+            <option value="1">{t("common.on")}</option>
+            <option value="0">{t("common.off")}</option>
           </select>
         </div>
       </div>
@@ -398,14 +408,18 @@ export function ContractMarketForm({
           disabled={isSaving}
           className="rounded border border-border px-4 py-2 text-sm text-foreground transition hover:bg-surface-elevated disabled:opacity-40"
         >
-          Cancel
+          {t("common.cancel")}
         </button>
         <button
           type="submit"
           disabled={isSaving}
           className="rounded bg-primary px-4 py-2 text-sm font-medium text-background transition hover:opacity-90 disabled:opacity-40"
         >
-          {isSaving ? "Saving…" : isCreating ? "Create market" : "Save market"}
+          {isSaving
+            ? t("common.saving")
+            : isCreating
+              ? t("page.contractSettings.createMarket")
+              : t("page.contractSettings.saveMarket")}
         </button>
       </div>
     </form>

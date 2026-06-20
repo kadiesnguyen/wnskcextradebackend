@@ -12,6 +12,8 @@ const config: Config = {
         surface: "var(--color-surface)",
         "surface-elevated": "var(--color-surface-elevated)",
         border: "var(--color-border)",
+        "muted-chip": "var(--color-muted-chip)",
+        overlay: "var(--color-overlay)",
         danger: "var(--color-error)",
         success: "var(--color-success)",
       },

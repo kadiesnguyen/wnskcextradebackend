@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useLogout } from "@/features/auth/useAuth";
 import type { AdminUser } from "@/features/auth/types";
+import { ThemeToggle } from "@/components/theme/ThemeToggle";
 import { useI18n } from "@/lib/i18n/useI18n";
 import type { Locale } from "@/lib/i18n/types";
 
@@ -21,7 +22,8 @@ export function AppShellHeader({ user }: AppShellHeaderProps) {
         <p className="text-xs uppercase tracking-wide text-muted">{t("auth.signedInAs")}</p>
         <p className="text-sm font-medium text-foreground">{displayName}</p>
       </div>
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center justify-end gap-2 sm:gap-3">
+        <ThemeToggle compact />
         <label className="flex items-center gap-2 text-sm text-muted">
           <span className="sr-only">{t("common.language")}</span>
           <select

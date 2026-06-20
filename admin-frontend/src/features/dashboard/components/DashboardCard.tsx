@@ -18,20 +18,20 @@ export function DashboardCard({
 }: DashboardCardProps) {
   return (
     <section
-      className={`flex min-h-0 flex-col overflow-hidden rounded-xl border border-border bg-surface ${className}`}
+      className={`dashboard-card flex min-h-0 flex-col overflow-hidden ${className}`.trim()}
     >
-      <header className="flex shrink-0 items-center justify-between border-b border-border/60 px-4 py-2.5">
-        <h3 className="text-xs font-semibold uppercase tracking-wider text-muted">{title}</h3>
+      <header className="flex shrink-0 items-center justify-between gap-3 border-b border-border px-4 py-3">
+        <h3 className="min-w-0 truncate text-base font-semibold text-foreground">{title}</h3>
         {action ? (
           <Link
             href={action.href}
-            className="text-xs font-medium text-primary transition hover:text-foreground"
+            className="shrink-0 whitespace-nowrap text-sm font-medium text-primary transition hover:opacity-80"
           >
             {action.label}
           </Link>
         ) : null}
       </header>
-      <div className={`min-h-0 flex-1 ${bodyClassName}`}>{children}</div>
+      <div className={`min-h-0 min-w-0 flex-1 ${bodyClassName}`.trim()}>{children}</div>
     </section>
   );
 }

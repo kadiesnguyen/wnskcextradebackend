@@ -56,6 +56,34 @@ export function stakeStateLabel(t: TranslateFn, state: number): string {
   return label(t, "label.stake.state", state);
 }
 
+export function spotOrderStatusLabel(t: TranslateFn, status: number): string {
+  return label(t, "label.spot.status", status);
+}
+
+export function transferStatusLabel(t: TranslateFn, status: number): string {
+  return label(t, "label.transfer.status", status);
+}
+
+export function walletStatusLabel(t: TranslateFn, status: number): string {
+  return label(t, "label.wallet.status", status);
+}
+
+export function contentStatusLabel(t: TranslateFn, status: number): string {
+  return label(t, "label.content.status", status);
+}
+
+export function issueLogStatusLabel(t: TranslateFn, status: number): string {
+  return label(t, "label.issueLog.status", status);
+}
+
+export function activeInactiveLabel(t: TranslateFn, active: boolean): string {
+  return active ? t("common.active") : t("common.inactive");
+}
+
+export function onOffLabel(t: TranslateFn, on: boolean): string {
+  return on ? t("common.on") : t("common.off");
+}
+
 export function queueResultLabel(t: TranslateFn, result: string): string {
   const normalized = result.trim().toUpperCase();
   if (normalized === "WIN") return t("action.win");

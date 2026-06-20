@@ -1,5 +1,6 @@
 "use client";
 
+import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { formatTimestamp } from "@/features/finance/lib/format";
 import { minerStatusLabel, minerTypeLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
@@ -21,20 +22,20 @@ export function MinerList({ miners, pendingId, onEdit, onToggleStatus, onDelete 
   const { t } = useI18n();
 
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell>
+      <table className={tableClassName}>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.id")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.title")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.type")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.price")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("page.miners.col.output")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("page.miners.col.cycle")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("page.miners.col.soldTotal")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.status")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("page.miners.col.added")}</th>
-            <th scope="col" className="px-4 py-3 font-medium">{t("common.actions")}</th>
+            <th scope="col" className={thClassName}>{t("common.id")}</th>
+            <th scope="col" className={thClassName}>{t("common.title")}</th>
+            <th scope="col" className={thClassName}>{t("common.type")}</th>
+            <th scope="col" className={thClassName}>{t("common.price")}</th>
+            <th scope="col" className={thClassName}>{t("page.miners.col.output")}</th>
+            <th scope="col" className={thClassName}>{t("page.miners.col.cycle")}</th>
+            <th scope="col" className={thClassName}>{t("page.miners.col.soldTotal")}</th>
+            <th scope="col" className={thClassName}>{t("common.status")}</th>
+            <th scope="col" className={thClassName}>{t("page.miners.col.added")}</th>
+            <th scope="col" className={thClassName}>{t("common.actions")}</th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border">
@@ -95,6 +96,6 @@ export function MinerList({ miners, pendingId, onEdit, onToggleStatus, onDelete 
           })}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

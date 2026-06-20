@@ -36,19 +36,12 @@ export type DashboardMember = {
   is_agent: number;
 };
 
-export type DashboardSupportTicket = {
-  id: number;
-  username: string;
-  pending_count: number;
-};
-
 export type DashboardOverview = {
   kpis: DashboardKpis;
   revenue_trend: RevenueTrendPoint[];
   deposit_withdrawal_trend: DepositWithdrawalPoint[];
   top_agents: DashboardAgent[];
   latest_members: DashboardMember[];
-  open_support_tickets: DashboardSupportTicket[];
   recent_logins: LoginLog[];
   recent_transactions: Bill[];
 };

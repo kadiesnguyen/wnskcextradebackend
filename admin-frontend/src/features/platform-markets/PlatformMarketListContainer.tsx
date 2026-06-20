@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ErrorState } from "@/components/ui/ErrorState";
-import { DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav } from "@/components/list/ListPageParts";
+import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav } from "@/components/list/ListPageParts"
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { PlatformMarketListSkeleton } from "./PlatformMarketListSkeleton";
@@ -43,7 +43,7 @@ export function PlatformMarketListContainer() {
         <>
           <PageMetaBar meta={meta} isFetching={isFetching} />
           <DataTable columns={[{ key: "id", label: t("common.id") }, { key: "name", label: "Name" }, { key: "new_price", label: "Price" }, { key: "volume", label: "Volume" }, { key: "change", label: "Change" }, { key: "actions", label: t("common.actions") }]}>
-            {items.map((item) => (<tr key={item.id}><td className="px-4 py-3">{item.id}</td><td className="px-4 py-3">{item.name}</td><td className="px-4 py-3">{item.new_price}</td><td className="px-4 py-3">{item.volume}</td><td className="px-4 py-3">{item.change}</td><td className="px-4 py-3"><button type="button" onClick={() => openEdit(item)} className="text-sm text-primary">{t("common.edit")}</button></td></tr>))}
+            {items.map((item) => (<tr key={item.id}><DataTableCell columnKey="id">{item.id}</DataTableCell><DataTableCell columnKey="id">{item.name}</DataTableCell><DataTableCell columnKey="name">{item.new_price}</DataTableCell><DataTableCell columnKey="new_price">{item.volume}</DataTableCell><DataTableCell columnKey="volume">{item.change}</DataTableCell><DataTableCell columnKey="change"><button type="button" onClick={() => openEdit(item)} className="text-sm text-primary">{t("common.edit")}</button></DataTableCell></tr>))}
           </DataTable>
           {meta ? <PaginationNav meta={meta} onPageChange={(p) => updateParams({ page: String(p) })} isFetching={isFetching} /> : null}
         </>

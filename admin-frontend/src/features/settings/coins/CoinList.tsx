@@ -1,3 +1,4 @@
+import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import type { AdminCoin } from "./types";
 
 type CoinListProps = {
@@ -25,29 +26,29 @@ function typeLabel(type: number): string {
 
 export function CoinList({ items, onEdit, onToggleStatus, onDelete, pendingId }: CoinListProps) {
   return (
-    <div className="overflow-x-auto rounded-lg border border-border">
-      <table className="min-w-full text-left text-sm">
-        <thead className="border-b border-border bg-surface-elevated text-xs uppercase tracking-wide text-muted">
+    <TableShell>
+      <table className={tableClassName}>
+        <thead className={theadClassName}>
           <tr>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               ID
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Name
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Title
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Type
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Sort
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Status
             </th>
-            <th scope="col" className="px-4 py-3 font-medium">
+            <th scope="col" className={thClassName}>
               Actions
             </th>
           </tr>
@@ -103,6 +104,6 @@ export function CoinList({ items, onEdit, onToggleStatus, onDelete, pendingId }:
           })}
         </tbody>
       </table>
-    </div>
+    </TableShell>
   );
 }

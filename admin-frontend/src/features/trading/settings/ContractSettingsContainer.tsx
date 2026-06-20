@@ -82,9 +82,9 @@ export function ContractSettingsContainer() {
 
     try {
       const result = await saveSettings.mutateAsync(payload as unknown as UpdateContractSettingPayload);
-      setSettingsSuccess(result.message || "Settings saved.");
+      setSettingsSuccess(result.message || t("page.contractSettings.saved"));
     } catch (err) {
-      setSettingsError(err instanceof Error ? err.message : "Failed to save settings.");
+      setSettingsError(err instanceof Error ? err.message : t("page.contractSettings.saveFailed"));
     }
   };
 
@@ -100,7 +100,7 @@ export function ContractSettingsContainer() {
         setEditingMarket(null);
       }
     } catch (err) {
-      setMarketError(err instanceof Error ? err.message : "Failed to save market.");
+      setMarketError(err instanceof Error ? err.message : t("page.contractSettings.marketSaveFailed"));
     }
   };
 
@@ -121,7 +121,7 @@ export function ContractSettingsContainer() {
           message={
             settingsQueryError instanceof Error
               ? settingsQueryError.message
-              : "Failed to load contract settings."
+              : t("page.contractSettings.loadFailed")
           }
           retry={() => refetchSettings()}
         />
@@ -141,9 +141,9 @@ export function ContractSettingsContainer() {
         <div className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
           <div>
             <h2 id="markets-heading" className="text-lg font-semibold text-foreground">
-              Markets
+              {t("page.contractSettings.marketsTitle")}
             </h2>
-            <p className="mt-1 text-sm text-muted">Contract trading pairs and limits.</p>
+            <p className="mt-1 text-sm text-muted">{t("page.contractSettings.marketsHint")}</p>
           </div>
           {!showMarketForm ? (
             <button
@@ -155,7 +155,7 @@ export function ContractSettingsContainer() {
               }}
               className="rounded bg-primary px-4 py-2 text-sm font-medium text-background transition hover:opacity-90"
             >
-              Add market
+              {t("page.contractSettings.addMarket")}
             </button>
           ) : null}
         </div>
@@ -183,7 +183,7 @@ export function ContractSettingsContainer() {
             message={
               marketsQueryError instanceof Error
                 ? marketsQueryError.message
-                : "Failed to load markets."
+                : t("page.contractSettings.marketsLoadFailed")
             }
             retry={() => refetchMarkets()}
           />
@@ -191,8 +191,8 @@ export function ContractSettingsContainer() {
 
         {!marketsIsError && !marketsLoading && markets.length === 0 ? (
           <div role="status" className="rounded-lg border border-border bg-surface px-6 py-12 text-center">
-            <h3 className="text-sm font-medium text-foreground">No markets found</h3>
-            <p className="mt-1 text-sm text-muted">Create a market to get started.</p>
+            <h3 className="text-sm font-medium text-foreground">{t("page.contractSettings.noMarkets")}</h3>
+            <p className="mt-1 text-sm text-muted">{t("page.contractSettings.noMarketsHint")}</p>
           </div>
         ) : null}
 
@@ -202,10 +202,14 @@ export function ContractSettingsContainer() {
               <p>
                 {marketsMeta ? (
                   <>
-                    Page {marketsMeta.current_page} of {marketsMeta.last_page} — {marketsMeta.total} total
+                    {t("common.pageInfo", {
+                      current: String(marketsMeta.current_page),
+                      last: String(marketsMeta.last_page),
+                      total: String(marketsMeta.total),
+                    })}
                   </>
                 ) : null}
-                {marketsFetching ? <span className="ml-2 text-primary">Updating…</span> : null}
+                {marketsFetching ? <span className="ml-2 text-primary">{t("common.updating")}</span> : null}
               </p>
             </div>
             <ContractMarketsList
@@ -218,14 +222,14 @@ export function ContractSettingsContainer() {
               }}
             />
             {marketsMeta && marketsMeta.last_page > 1 ? (
-              <nav aria-label="Markets pagination" className="flex items-center justify-center gap-2">
+              <nav aria-label={t("common.pagination")} className="flex items-center justify-center gap-2">
                 <button
                   type="button"
                   disabled={marketsMeta.current_page <= 1}
                   onClick={() => updateParams({ page: String(marketsMeta.current_page - 1) })}
                   className="rounded border border-border px-3 py-1.5 text-sm text-foreground transition hover:bg-surface-elevated disabled:opacity-40"
                 >
-                  Previous
+                  {t("common.previous")}
                 </button>
                 <span className="px-2 text-sm text-muted">
                   {marketsMeta.current_page} / {marketsMeta.last_page}
@@ -236,7 +240,7 @@ export function ContractSettingsContainer() {
                   onClick={() => updateParams({ page: String(marketsMeta.current_page + 1) })}
                   className="rounded border border-border px-3 py-1.5 text-sm text-foreground transition hover:bg-surface-elevated disabled:opacity-40"
                 >
-                  Next
+                  {t("common.next")}
                 </button>
               </nav>
             ) : null}

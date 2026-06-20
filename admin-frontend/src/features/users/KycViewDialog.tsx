@@ -57,11 +57,11 @@ export function KycViewDialog({ userId, onClose }: KycViewDialogProps) {
               <div className="grid gap-4 sm:grid-cols-2">
                 <div>
                   <p className="mb-2 text-sm font-medium text-foreground">{t("kyc.idFront")}</p>
-                  {data.cardzm ? (
-                    <a href={data.cardzm} target="_blank" rel="noopener noreferrer" className="block">
+                  {data.cardfm ? (
+                    <a href={data.cardfm} target="_blank" rel="noopener noreferrer" className="block">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={data.cardzm}
+                        src={data.cardfm}
                         alt={t("kyc.idFront")}
                         className="max-h-40 rounded border border-border object-contain"
                       />
@@ -72,11 +72,11 @@ export function KycViewDialog({ userId, onClose }: KycViewDialogProps) {
                 </div>
                 <div>
                   <p className="mb-2 text-sm font-medium text-foreground">{t("kyc.idBack")}</p>
-                  {data.cardfm ? (
-                    <a href={data.cardfm} target="_blank" rel="noopener noreferrer" className="block">
+                  {data.cardzm ? (
+                    <a href={data.cardzm} target="_blank" rel="noopener noreferrer" className="block">
                       {/* eslint-disable-next-line @next/next/no-img-element */}
                       <img
-                        src={data.cardfm}
+                        src={data.cardzm}
                         alt={t("kyc.idBack")}
                         className="max-h-40 rounded border border-border object-contain"
                       />

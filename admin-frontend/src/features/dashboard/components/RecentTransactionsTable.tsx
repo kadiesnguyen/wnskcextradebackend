@@ -1,8 +1,16 @@
 import type { Bill } from "@/features/bills/types";
+import {
+  AnnotatedCell,
+  TableShell,
+  tableClassName,
+} from "@/components/list/TableShell";
 import { billStLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
-import { formatTimestamp } from "../format";
+import { formatDashboardTimestamp } from "../format";
 import { DashboardCard } from "./DashboardCard";
+
+const dashboardThClassName =
+  "px-3 py-2.5 font-medium first:pl-4 last:pr-4 md:px-3 md:py-2.5 md:first:pl-4 md:last:pr-4";
 
 type RecentTransactionsTableProps = {
   title: string;
@@ -31,56 +39,88 @@ export function RecentTransactionsTable({
     <DashboardCard
       title={title}
       action={{ label: viewAllLabel, href: "/finance/bills" }}
-      bodyClassName="min-h-[200px] overflow-auto"
+      bodyClassName="min-h-[12.5rem] p-0"
+      className="h-full"
     >
       {transactions.length === 0 ? (
         <p className="px-4 py-6 text-sm text-muted">{emptyLabel}</p>
       ) : (
-        <table className="w-full min-w-[420px] text-left text-sm">
-          <thead>
-            <tr className="border-b border-border/60 text-[11px] uppercase tracking-wider text-muted">
-              <th className="px-4 py-2 font-medium">{columns.user}</th>
-              <th className="px-4 py-2 font-medium">{columns.amount}</th>
-              <th className="px-4 py-2 font-medium">{columns.coin}</th>
-              <th className="px-4 py-2 font-medium">{columns.type}</th>
-              <th className="px-4 py-2 font-medium">{columns.time}</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-border/40">
-            {transactions.map((tx) => (
-              <tr key={tx.id} className="transition hover:bg-surface-elevated/50">
-                <td className="max-w-[120px] truncate px-4 py-2 font-medium text-foreground">
-                  {tx.username}
-                </td>
-                <td
-                  className={`px-4 py-2 font-mono text-xs tabular-nums ${
-                    tx.st === 1 ? "text-success" : tx.st === 2 ? "text-danger" : "text-foreground"
-                  }`}
-                >
-                  {tx.st === 2 ? "−" : "+"}
-                  {tx.num}
-                </td>
-                <td className="px-4 py-2 text-xs uppercase text-muted">{tx.coinname}</td>
-                <td className="px-4 py-2">
-                  <span
-                    className={`inline-flex rounded-full px-2 py-0.5 text-[10px] font-medium ${
-                      tx.st === 1
-                        ? "bg-success/15 text-success"
-                        : tx.st === 2
-                          ? "bg-danger/15 text-danger"
-                          : "bg-white/5 text-muted"
-                    }`}
-                  >
-                    {billStLabel(translate, tx.st)}
-                  </span>
-                </td>
-                <td className="whitespace-nowrap px-4 py-2 text-xs text-muted">
-                  {formatTimestamp(tx.addtime)}
-                </td>
+        <TableShell className="rounded-none border-0">
+          <table className={tableClassName}>
+            <colgroup>
+              <col className="w-[32%]" />
+              <col className="w-[18%]" />
+              <col className="hidden w-[14%] md:table-column" />
+              <col className="w-[22%]" />
+              <col className="hidden w-[14%] lg:table-column" />
+            </colgroup>
+            <thead className="dashboard-table-head border-b border-border">
+              <tr>
+                <th className={dashboardThClassName}>{columns.user}</th>
+                <th className={dashboardThClassName}>{columns.amount}</th>
+                <th className={`${dashboardThClassName} hidden md:table-cell`}>{columns.coin}</th>
+                <th className={dashboardThClassName}>{columns.type}</th>
+                <th className={`${dashboardThClassName} hidden lg:table-cell`}>{columns.time}</th>
               </tr>
-            ))}
-          </tbody>
-        </table>
+            </thead>
+            <tbody className="divide-y divide-border/40">
+              {transactions.map((tx) => (
+                <tr key={tx.id} className="transition hover:bg-surface-elevated/50">
+                  <AnnotatedCell
+                    label={columns.user}
+                    className="min-w-0 font-medium text-foreground"
+                  >
+                    <span className="block truncate" title={tx.username}>
+                      {tx.username}
+                    </span>
+                  </AnnotatedCell>
+                  <AnnotatedCell
+                    label={columns.amount}
+                    className="min-w-0 font-mono text-xs tabular-nums"
+                  >
+                    <span
+                      className={
+                        tx.st === 1 ? "text-success" : tx.st === 2 ? "text-danger" : "text-foreground"
+                      }
+                    >
+                      {tx.st === 2 ? "−" : "+"}
+                      {tx.num}
+                    </span>
+                  </AnnotatedCell>
+                  <AnnotatedCell
+                    label={columns.coin}
+                    className="hidden min-w-0 text-xs uppercase text-muted md:table-cell"
+                  >
+                    <span className="block truncate" title={tx.coinname}>
+                      {tx.coinname}
+                    </span>
+                  </AnnotatedCell>
+                  <AnnotatedCell label={columns.type} className="min-w-0">
+                    <span
+                      className={`inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-xs font-medium ${
+                        tx.st === 1
+                          ? "bg-success/15 text-success"
+                          : tx.st === 2
+                            ? "bg-danger/15 text-danger"
+                            : "bg-muted-chip text-muted"
+                      }`}
+                    >
+                      {billStLabel(translate, tx.st)}
+                    </span>
+                  </AnnotatedCell>
+                  <AnnotatedCell
+                    label={columns.time}
+                    className="hidden min-w-0 text-xs tabular-nums text-muted lg:table-cell"
+                  >
+                    <span className="block truncate" title={formatDashboardTimestamp(tx.addtime)}>
+                      {formatDashboardTimestamp(tx.addtime)}
+                    </span>
+                  </AnnotatedCell>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </TableShell>
       )}
     </DashboardCard>
   );

@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\ContractResultQueueActionRequest;
+use App\Http\Requests\Admin\UpdateContractResultQueueRequest;
 use App\Http\Resources\Admin\ContractResultQueueResource;
 use App\Models\HyResultQueue;
 use Illuminate\Http\JsonResponse;
@@ -88,5 +89,64 @@ class ContractQueueController extends Controller
             'status' => false,
             'message' => 'Parameter error.',
         ], Response::HTTP_UNPROCESSABLE_ENTITY);
+    }
+
+    public function update(int $id, UpdateContractResultQueueRequest $request): JsonResponse
+    {
+        $entry = HyResultQueue::query()->find($id);
+
+        if (!$entry) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Entry not found.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $entry->update([
+            'result' => $request->input('result'),
+        ]);
+
+        return response()->json([
+            'status' => true,
+            'code' => 1,
+            'message' => 'Successfully.',
+            'data' => new ContractResultQueueResource($entry->fresh()),
+        ]);
+    }
+
+    public function destroy(int $id): JsonResponse
+    {
+        $entry = HyResultQueue::query()->find($id);
+
+        if (!$entry) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Entry not found.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $entry->delete();
+        $this->renumberRounds();
+
+        return response()->json([
+            'status' => true,
+            'code' => 1,
+            'message' => 'Successfully.',
+        ]);
+    }
+
+    private function renumberRounds(): void
+    {
+        $entries = HyResultQueue::query()
+            ->orderBy('round_no')
+            ->orderBy('id')
+            ->get();
+
+        foreach ($entries as $index => $entry) {
+            $roundNo = $index + 1;
+            if ((int) $entry->round_no !== $roundNo) {
+                $entry->update(['round_no' => $roundNo]);
+            }
+        }
     }
 }

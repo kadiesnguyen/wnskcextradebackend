@@ -10,7 +10,12 @@ type TopAgentsPanelProps = {
 
 export function TopAgentsPanel({ title, viewAllLabel, agents, emptyLabel }: TopAgentsPanelProps) {
   return (
-    <DashboardCard title={title} action={{ label: viewAllLabel, href: "/users/agents" }} bodyClassName="overflow-auto p-0" className="h-[248px]">
+    <DashboardCard
+      title={title}
+      action={{ label: viewAllLabel, href: "/users/agents" }}
+      bodyClassName="overflow-auto p-0"
+      className="h-full min-h-[15.5rem]"
+    >
       {agents.length === 0 ? (
         <p className="px-4 py-6 text-sm text-muted">{emptyLabel}</p>
       ) : (
@@ -22,9 +27,9 @@ export function TopAgentsPanel({ title, viewAllLabel, agents, emptyLabel }: TopA
                   index === 0
                     ? "bg-primary/20 text-primary"
                     : index === 1
-                      ? "bg-white/10 text-foreground"
+                      ? "bg-surface-elevated text-foreground"
                       : index === 2
-                        ? "bg-white/5 text-muted"
+                        ? "bg-muted-chip text-muted"
                         : "bg-transparent text-muted"
                 }`}
               >
@@ -32,7 +37,7 @@ export function TopAgentsPanel({ title, viewAllLabel, agents, emptyLabel }: TopA
               </span>
               <div className="min-w-0 flex-1">
                 <p className="truncate text-sm font-medium text-foreground">{agent.username}</p>
-                <p className="truncate text-[11px] text-muted">
+                <p className="truncate text-xs text-muted">
                   {agent.invit ? `#${agent.invit}` : "—"}
                 </p>
               </div>

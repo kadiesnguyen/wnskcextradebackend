@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ActionButton, RowActions, ToolbarActions, useRowSelection } from "@/components/actions";
-import { ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, actionsColumn } from "@/components/list/ListPageParts";
+import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, actionsColumn } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
@@ -55,8 +55,8 @@ export function AdminListContainer() {
             {items.map((item: AdminAccount) => (
               <tr key={item.id}>
                 <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <td className="px-4 py-3">{item.id}</td>
-                <td className="px-4 py-3">{item.username}</td>
+                <DataTableCell columnKey="id">{item.id}</DataTableCell>
+                <DataTableCell columnKey="username">{item.username}</DataTableCell>
                 <td className="px-4 py-3">{item.email}</td>
                 <td className="px-4 py-3">{item.nickname}</td>
                 <ActionsCell><RowActions><ActionButton onClick={() => { setEditingId(item.id); setFormOpen(true); }}>{t("common.edit")}</ActionButton></RowActions></ActionsCell>

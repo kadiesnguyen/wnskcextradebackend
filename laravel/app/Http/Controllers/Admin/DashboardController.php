@@ -10,7 +10,6 @@ use App\Models\Hyorder;
 use App\Models\IssueLog;
 use App\Models\Kjorder;
 use App\Models\Myzc;
-use App\Models\Online;
 use App\Models\Recharge;
 use App\Models\User;
 use App\Models\UserLog;
@@ -58,7 +57,6 @@ class DashboardController extends Controller
 
         $topAgents = $this->topAgents(5);
         $latestMembers = $this->latestMembers(5);
-        $openSupportTickets = $this->openSupportTickets(5);
 
         $recentLogins = UserLog::query()->orderByDesc('id')->limit(6)->get();
         $this->attachUsernamesToLogs($recentLogins);
@@ -88,7 +86,6 @@ class DashboardController extends Controller
                 'deposit_withdrawal_trend' => $depositWithdrawalTrend,
                 'top_agents' => $topAgents,
                 'latest_members' => $latestMembers,
-                'open_support_tickets' => $openSupportTickets,
                 'recent_logins' => UserLogResource::collection($recentLogins),
                 'recent_transactions' => BillResource::collection($recentTransactions),
             ],
@@ -240,37 +237,6 @@ class DashboardController extends Controller
                 'addtime' => (int) $user->addtime,
                 'status' => (int) $user->status,
                 'is_agent' => (int) $user->is_agent,
-            ])
-            ->all();
-    }
-
-    /**
-     * @return list<array{id: int, username: string, pending_count: int}>
-     */
-    private function openSupportTickets(int $limit): array
-    {
-        $pending = Online::query()
-            ->where('state', 0)
-            ->selectRaw('uid, count(*) as pending_count')
-            ->groupBy('uid')
-            ->orderByDesc('pending_count')
-            ->limit($limit)
-            ->get();
-
-        if ($pending->isEmpty()) {
-            return [];
-        }
-
-        $userIds = $pending->pluck('uid')->all();
-        $usernames = User::query()
-            ->whereIn('id', $userIds)
-            ->pluck('username', 'id');
-
-        return $pending
-            ->map(fn ($row) => [
-                'id' => (int) $row->uid,
-                'username' => (string) ($usernames[$row->uid] ?? '—'),
-                'pending_count' => (int) $row->pending_count,
             ])
             ->all();
     }
