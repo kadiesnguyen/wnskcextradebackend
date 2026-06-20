@@ -1,13 +1,14 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ActionButton, RowActions, ToolbarActions, useRowSelection } from "@/components/actions";
-import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
+import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, SelectCell, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { loginLogStatusLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { LoginLogListSkeleton } from "./LoginLogListSkeleton";
+import { formatCompactTimestamp } from "@/features/trading/lib/format";
 import { useLoginLogActions } from "./useLoginLogActions";
 import { useLoginLogs } from "./useLoginLogs";
 import type { LoginLog } from "./types";
@@ -30,12 +31,9 @@ export function LoginLogListContainer() {
   const selection = useRowSelection(items);
 
   const columns = [
-    { key: "id", label: t("common.id") },
-    { key: "username", label: t("common.username") },
-    { key: "type", label: t("common.type") },
-    { key: "addip", label: "IP" },
+    { key: "username", label: t("common.username"), className: "w-[28%]" },
+    { key: "session", label: t("page.loginLogs.session") },
     { key: "status", label: t("common.status") },
-    { key: "addtime", label: t("common.time") },
     actionsColumn(t),
   ];
 
@@ -59,13 +57,17 @@ export function LoginLogListContainer() {
           <DataTable columns={columns} selectable allSelected={selection.allSelected} someSelected={selection.someSelected} onToggleAll={selection.toggleAll}>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username ?? "—"}</DataTableCell>
-                <td className="px-4 py-3">{item.type ?? "—"}</td>
-                <td className="px-4 py-3">{item.addip ?? "—"}</td>
-                <td className="px-4 py-3">{loginLogStatusLabel(t, item.status)}</td>
-                <td className="px-4 py-3">{item.addtime}</td>
+                <SelectCell><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></SelectCell>
+                <DataTableCell columnKey="username" className="break-all font-medium">
+                  {item.username ?? "—"}
+                </DataTableCell>
+                <DataTableCell columnKey="session">
+                  <div className="space-y-0.5 text-sm">
+                    <div className="font-mono text-xs text-foreground">{item.addip ?? "—"}</div>
+                    <div className="text-xs text-muted">{formatCompactTimestamp(item.addtime)}</div>
+                  </div>
+                </DataTableCell>
+                <DataTableCell columnKey="status">{loginLogStatusLabel(t, item.status)}</DataTableCell>
                 <ActionsCell><RowActions><ActionButton onClick={() => { setEditing(item); setRemark(item.remark ?? ""); setFormOpen(true); }}>{t("common.edit")}</ActionButton></RowActions></ActionsCell>
               </tr>
             ))}

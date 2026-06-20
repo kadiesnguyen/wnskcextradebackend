@@ -1,8 +1,10 @@
 "use client";
 
+import { Suspense } from "react";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { ContractOrderListContainer } from "@/features/trading/orders/ContractOrderListContainer";
+import { ContractOrderListSkeleton } from "@/features/trading/orders/ContractOrderListSkeleton";
 import { DepositWithdrawalChart } from "./components/DepositWithdrawalChart";
 import { DashboardCard } from "./components/DashboardCard";
 import { KpiCard } from "./components/KpiCard";
@@ -51,7 +53,9 @@ export function DashboardContainer() {
       {/* Contract orders — ops quick panel */}
       <section aria-label={t("page.dashboard.contractOrders")} className="min-w-0">
         <div className="dashboard-card p-4 md:p-5">
-          <ContractOrderListContainer embedded />
+          <Suspense fallback={<ContractOrderListSkeleton />}>
+            <ContractOrderListContainer embedded />
+          </Suspense>
         </div>
       </section>
 

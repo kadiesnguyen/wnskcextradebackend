@@ -198,6 +198,23 @@ export function RowCheckbox({ checked, onChange, label }: RowCheckboxProps) {
   );
 }
 
+export function SelectCell({
+  children,
+  onClick,
+}: {
+  children: React.ReactNode;
+  onClick?: React.MouseEventHandler<HTMLTableCellElement>;
+}) {
+  return (
+    <td
+      className="admin-table-select px-2 py-2 align-middle first:pl-3 last:pr-3 md:px-3 md:py-2.5 md:first:pl-4 md:last:pr-4"
+      onClick={onClick}
+    >
+      {children}
+    </td>
+  );
+}
+
 export function DataTable({
   columns,
   children,
@@ -221,7 +238,7 @@ export function DataTable({
           <thead className={theadClassName}>
             <tr>
               {selectable ? (
-                <th scope="col" className={`${thClassName} w-[4%]`}>
+                <th scope="col" className={`${thClassName} admin-table-select w-[4%]`}>
                   <input
                     type="checkbox"
                     checked={allSelected}

@@ -3,6 +3,7 @@
 import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { withdrawalStatusLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
+import { formatAmount } from "@/lib/format-number";
 import { formatTimestamp, withdrawalStatusClass } from "../lib/format";
 import type { AdminWithdrawal } from "./types";
 
@@ -28,7 +29,6 @@ export function WithdrawalList({
       <table className={tableClassName}>
         <thead className={theadClassName}>
           <tr>
-            <th scope="col" className={thClassName}>{t("common.id")}</th>
             <th scope="col" className={thClassName}>{t("common.username")}</th>
             <th scope="col" className={thClassName}>{t("common.coin")}</th>
             <th scope="col" className={thClassName}>{t("common.amount")}</th>
@@ -46,11 +46,10 @@ export function WithdrawalList({
 
             return (
               <tr key={withdrawal.id} className="bg-surface transition hover:bg-surface-elevated">
-                <td className="px-4 py-3 text-muted">{withdrawal.id}</td>
-                <td className="px-4 py-3 font-medium text-foreground">{withdrawal.username}</td>
+                <td className="break-all px-4 py-3 font-medium text-foreground">{withdrawal.username}</td>
                 <td className="px-4 py-3 uppercase text-foreground">{withdrawal.coinname}</td>
-                <td className="px-4 py-3 text-foreground">{withdrawal.num}</td>
-                <td className="px-4 py-3 text-muted">{withdrawal.mum}</td>
+                <td className="px-4 py-3 tabular-nums text-foreground">{formatAmount(withdrawal.num)}</td>
+                <td className="px-4 py-3 tabular-nums text-muted">{formatAmount(withdrawal.mum)}</td>
                 <td className="px-4 py-3 text-muted">{withdrawal.method_label}</td>
                 <td className="px-4 py-3">
                   <span

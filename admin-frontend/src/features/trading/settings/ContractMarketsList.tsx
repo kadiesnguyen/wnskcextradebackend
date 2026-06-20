@@ -3,6 +3,7 @@
 import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { activeInactiveLabel, onOffLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
+import { formatAmount } from "@/lib/format-number";
 import { marketStatusClass } from "../lib/format";
 import type { TradingMarket } from "./types";
 
@@ -20,9 +21,6 @@ export function ContractMarketsList({ markets, editingId, onEdit }: ContractMark
       <table className={tableClassName}>
         <thead className={theadClassName}>
           <tr>
-            <th scope="col" className={thClassName}>
-              {t("common.id")}
-            </th>
             <th scope="col" className={thClassName}>
               {t("page.contractSettings.marketName")}
             </th>
@@ -49,10 +47,11 @@ export function ContractMarketsList({ markets, editingId, onEdit }: ContractMark
               key={market.id}
               className={`bg-surface transition hover:bg-surface-elevated ${editingId === market.id ? "ring-1 ring-primary/40" : ""}`}
             >
-              <td className="px-4 py-3 text-muted">{market.id}</td>
               <td className="px-4 py-3 font-medium uppercase text-foreground">{market.name}</td>
               <td className="px-4 py-3 text-muted">{market.round}</td>
-              <td className="px-4 py-3 text-foreground">{market.new_price ?? "—"}</td>
+              <td className="px-4 py-3 tabular-nums text-foreground">
+                {market.new_price != null ? formatAmount(market.new_price) : "—"}
+              </td>
               <td className="px-4 py-3 text-muted">{onOffLabel(t, Number(market.trade) === 1)}</td>
               <td className="px-4 py-3">
                 <span

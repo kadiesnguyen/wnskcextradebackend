@@ -2,6 +2,7 @@
 
 import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { formatTimestamp } from "@/features/finance/lib/format";
+import { formatAmount } from "@/lib/format-number";
 import { minerStatusLabel, minerTypeLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import type { AdminMiner } from "./types";
@@ -26,7 +27,6 @@ export function MinerList({ miners, pendingId, onEdit, onToggleStatus, onDelete 
       <table className={tableClassName}>
         <thead className={theadClassName}>
           <tr>
-            <th scope="col" className={thClassName}>{t("common.id")}</th>
             <th scope="col" className={thClassName}>{t("common.title")}</th>
             <th scope="col" className={thClassName}>{t("common.type")}</th>
             <th scope="col" className={thClassName}>{t("common.price")}</th>
@@ -44,18 +44,17 @@ export function MinerList({ miners, pendingId, onEdit, onToggleStatus, onDelete 
 
             return (
               <tr key={miner.id} className="bg-surface transition hover:bg-surface-elevated">
-                <td className="px-4 py-3 text-muted">{miner.id}</td>
                 <td className="px-4 py-3 font-medium text-foreground">{miner.title}</td>
                 <td className="px-4 py-3 text-muted">{minerTypeLabel(t, miner.type)}</td>
-                <td className="px-4 py-3 text-foreground">
-                  {miner.pricenum} {miner.pricecoin.toUpperCase()}
+                <td className="px-4 py-3 tabular-nums text-foreground">
+                  {formatAmount(miner.pricenum)} {miner.pricecoin.toUpperCase()}
                 </td>
-                <td className="px-4 py-3 text-foreground">
-                  {miner.dayoutnum} {miner.outcoin.toUpperCase()}{t("page.miners.perDay")}
+                <td className="px-4 py-3 tabular-nums text-foreground">
+                  {formatAmount(miner.dayoutnum)} {miner.outcoin.toUpperCase()}{t("page.miners.perDay")}
                 </td>
                 <td className="px-4 py-3 text-muted">{miner.cycle} {t("page.miners.days")}</td>
-                <td className="px-4 py-3 text-foreground">
-                  {miner.sellnum} / {miner.allnum}
+                <td className="px-4 py-3 tabular-nums text-foreground">
+                  {formatAmount(miner.sellnum)} / {formatAmount(miner.allnum)}
                 </td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${statusClass(miner.status)}`}>

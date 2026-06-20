@@ -17,7 +17,6 @@ export function OnlineSupportContainer() {
   const items = data?.data ?? [];
   const meta = data?.meta;
   const columns = [
-    { key: "id", label: t("common.id") },
     { key: "username", label: t("common.username") },
     { key: "pending", label: "Pending" },
     actionsColumn(t),
@@ -34,9 +33,8 @@ export function OnlineSupportContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
-                <td className="px-4 py-3">{item.pending_count}</td>
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
+                <DataTableCell columnKey="pending">{item.pending_count}</DataTableCell>
                 <ActionsCell>
                   <RowActions>
                     <Link href={`/users/online-support/${item.id}`} className="rounded border border-border px-2.5 py-1 text-xs font-medium text-primary hover:bg-surface-elevated">{t("action.view")}</Link>

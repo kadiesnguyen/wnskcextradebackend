@@ -1,5 +1,6 @@
 import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { formatTimestamp } from "@/features/finance/lib/format";
+import { formatAmount } from "@/lib/format-number";
 import type { AdminStakingLog } from "./types";
 
 type StakingLogListProps = {
@@ -16,9 +17,6 @@ export function StakingLogList({ logs }: StakingLogListProps) {
       <table className={tableClassName}>
         <thead className={theadClassName}>
           <tr>
-            <th scope="col" className={thClassName}>
-              ID
-            </th>
             <th scope="col" className={thClassName}>
               Account
             </th>
@@ -48,11 +46,10 @@ export function StakingLogList({ logs }: StakingLogListProps) {
         <tbody className="divide-y divide-border">
           {logs.map((log) => (
             <tr key={log.id} className="bg-surface transition hover:bg-surface-elevated">
-              <td className="px-4 py-3 text-muted">{log.id}</td>
-              <td className="px-4 py-3 font-medium text-foreground">{log.account}</td>
+              <td className="break-all px-4 py-3 font-medium text-foreground">{log.account}</td>
               <td className="px-4 py-3 text-foreground">{log.name}</td>
-              <td className="px-4 py-3 text-foreground">{log.num}</td>
-              <td className="px-4 py-3 text-muted">{log.open}</td>
+              <td className="px-4 py-3 tabular-nums text-foreground">{formatAmount(log.num)}</td>
+              <td className="px-4 py-3 tabular-nums text-muted">{formatAmount(log.open)}</td>
               <td className="px-4 py-3 text-foreground">{log.percent}%</td>
               <td className="px-4 py-3">
                 <span

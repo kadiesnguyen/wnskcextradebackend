@@ -12,6 +12,7 @@ import {
   UsernameFilter,
 } from "@/components/list/ListPageParts";
 import { spotOrderStatusLabel } from "@/lib/i18n/entity-labels";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { SpotLimitListSkeleton } from "./SpotLimitListSkeleton";
@@ -19,7 +20,6 @@ import { useSpotLimit } from "./useSpot";
 
 function spotOrderColumns(t: (key: string) => string) {
   return [
-    { key: "id", label: t("common.id"), className: "w-[6%]" },
     { key: "account", label: t("common.username"), className: "w-[24%]" },
     { key: "symbol", label: t("common.symbol"), className: "w-[12%]" },
     { key: "coinnum", label: t("common.amount"), className: "w-[10%]" },
@@ -69,10 +69,9 @@ export function SpotLimitListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="account">{item.account}</DataTableCell>
+                <DataTableCell columnKey="account" className="break-all">{item.account}</DataTableCell>
                 <DataTableCell columnKey="symbol">{item.symbol}</DataTableCell>
-                <DataTableCell columnKey="coinnum">{item.coinnum}</DataTableCell>
+                <DataTableCell columnKey="coinnum" className="tabular-nums">{formatAmount(item.coinnum)}</DataTableCell>
                 <DataTableCell columnKey="status_label">
                   {spotOrderStatusLabel(t, item.status)}
                 </DataTableCell>

@@ -1,6 +1,7 @@
 "use client";
 
 import { contractHyzdLabel } from "@/lib/i18n/entity-labels";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useEffect, useRef } from "react";
 import type { ContractOrderAlertData } from "./types";
@@ -68,12 +69,12 @@ export function ContractOrderAlertDialog({
                 className="flex items-center justify-between gap-3 rounded-md px-3 py-2 text-sm"
               >
                 <div className="min-w-0">
-                  <p className="truncate font-medium text-foreground">{order.username}</p>
+                  <p className="break-all font-medium text-foreground">{order.username}</p>
                   <p className="text-xs text-muted">
                     #{order.id} · {order.coinname} · {contractHyzdLabel(t, order.hyzd)}
                   </p>
                 </div>
-                <span className="shrink-0 font-semibold tabular-nums text-primary">{order.num}</span>
+                <span className="shrink-0 font-semibold tabular-nums text-primary">{formatAmount(order.num)}</span>
               </li>
             ))}
           </ul>

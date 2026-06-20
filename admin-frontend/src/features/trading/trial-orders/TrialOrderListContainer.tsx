@@ -20,8 +20,7 @@ export function TrialOrderListContainer() {
   const items = data?.data ?? [];
   const meta = data?.meta;
   const columns = [
-    { key: "id", label: t("common.id") }, { key: "username", label: t("common.username") },
-    { key: "coinname", label: t("common.coin") }, { key: "num", label: t("common.amount") },
+    { key: "username", label: t("common.username") }, { key: "coinname", label: t("common.coin") }, { key: "num", label: t("common.amount") },
     { key: "status_label", label: t("common.status") }, { key: "buytime", label: t("common.time") },
     actionsColumn(t),
   ];
@@ -38,12 +37,11 @@ export function TrialOrderListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
-                <td className="px-4 py-3">{item.coinname?.toUpperCase()}</td>
-                <td className="px-4 py-3">{item.num}</td>
-                <td className="px-4 py-3">{contractStatusLabel(t, item.status)}</td>
-                <td className="px-4 py-3">{item.buytime ?? item.addtime ?? "—"}</td>
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
+                <DataTableCell columnKey="coinname">{item.coinname?.toUpperCase()}</DataTableCell>
+                <DataTableCell columnKey="num" className="tabular-nums">{item.num}</DataTableCell>
+                <DataTableCell columnKey="status_label">{contractStatusLabel(t, item.status)}</DataTableCell>
+                <DataTableCell columnKey="buytime">{item.buytime ?? item.addtime ?? "—"}</DataTableCell>
                 <ActionsCell><RowActions><ActionButton onClick={() => setViewItem(item as unknown as Record<string, unknown>)}>{t("action.check")}</ActionButton></RowActions></ActionsCell>
               </tr>
             ))}

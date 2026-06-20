@@ -144,6 +144,8 @@ const en: Dictionary = {
   "auth.signingIn": "Signing in…",
 
   "nav.noMenus": "No menu items configured yet.",
+  "nav.openMenu": "Open navigation menu",
+  "nav.closeMenu": "Close navigation menu",
   "nav.dashboard": "Dashboard",
   "nav.users": "Users",
   "nav.agents": "Agents",
@@ -253,6 +255,7 @@ const en: Dictionary = {
   "page.loginLogs.title": "Login logs",
   "page.loginLogs.description": "Track member login history.",
   "page.loginLogs.noResults": "No login logs found",
+  "page.loginLogs.session": "IP / Time",
 
   "page.wallets.title": "User wallets",
   "page.wallets.description": "On-chain wallet addresses for members.",

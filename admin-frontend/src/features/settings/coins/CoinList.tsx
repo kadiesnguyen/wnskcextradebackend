@@ -31,9 +31,6 @@ export function CoinList({ items, onEdit, onToggleStatus, onDelete, pendingId }:
         <thead className={theadClassName}>
           <tr>
             <th scope="col" className={thClassName}>
-              ID
-            </th>
-            <th scope="col" className={thClassName}>
               Name
             </th>
             <th scope="col" className={thClassName}>
@@ -59,7 +56,6 @@ export function CoinList({ items, onEdit, onToggleStatus, onDelete, pendingId }:
 
             return (
               <tr key={item.id} className="bg-surface transition hover:bg-surface-elevated">
-                <td className="px-4 py-3 text-muted">{item.id}</td>
                 <td className="px-4 py-3 font-medium text-foreground">{item.name}</td>
                 <td className="px-4 py-3 text-foreground">{item.title ?? "—"}</td>
                 <td className="px-4 py-3 text-muted">{typeLabel(item.type)}</td>

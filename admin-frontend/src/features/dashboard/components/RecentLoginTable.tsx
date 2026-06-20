@@ -68,29 +68,23 @@ export function RecentLoginTable({
                     label={columns.user}
                     className="min-w-0 font-medium text-foreground"
                   >
-                    <span className="block truncate" title={log.username ?? undefined}>
-                      {log.username ?? "—"}
-                    </span>
+                    <span className="break-all">{log.username ?? "—"}</span>
                   </AnnotatedCell>
                   <AnnotatedCell
                     label={columns.ip}
                     className="min-w-0 font-mono text-xs text-muted"
                   >
-                    <span className="block truncate" title={log.addip ?? undefined}>
-                      {log.addip ?? "—"}
-                    </span>
+                    {log.addip ?? "—"}
                   </AnnotatedCell>
                   <AnnotatedCell
                     label={columns.time}
                     className="hidden min-w-0 text-xs tabular-nums text-muted md:table-cell"
                   >
-                    <span className="block truncate" title={formatDashboardTimestamp(log.addtime)}>
-                      {formatDashboardTimestamp(log.addtime)}
-                    </span>
+                    {formatDashboardTimestamp(log.addtime)}
                   </AnnotatedCell>
                   <AnnotatedCell label={columns.status} className="min-w-0">
                     <span
-                      className={`inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                         log.status === 1
                           ? "bg-success/15 text-success"
                           : log.status === 0

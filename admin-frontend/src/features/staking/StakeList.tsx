@@ -2,6 +2,7 @@
 
 import { TableShell, tableClassName, theadClassName, thClassName } from "@/components/list/TableShell";
 import { formatTimestamp } from "@/features/finance/lib/format";
+import { formatAmount } from "@/lib/format-number";
 import { stakeDisplayLabel, stakeStateLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import type { AdminStake } from "./types";
@@ -28,7 +29,6 @@ export function StakeList({ stakes, pendingId, onEdit }: StakeListProps) {
       <table className={tableClassName}>
         <thead className={theadClassName}>
           <tr>
-            <th scope="col" className={thClassName}>{t("common.id")}</th>
             <th scope="col" className={thClassName}>{t("stakeForm.name")}</th>
             <th scope="col" className={thClassName}>{t("page.staking.col.minMax")}</th>
             <th scope="col" className={thClassName}>{t("stakeForm.days")}</th>
@@ -45,12 +45,11 @@ export function StakeList({ stakes, pendingId, onEdit }: StakeListProps) {
 
             return (
               <tr key={stake.id} className="bg-surface transition hover:bg-surface-elevated">
-                <td className="px-4 py-3 text-muted">{stake.id}</td>
                 <td className="px-4 py-3 font-medium text-foreground">{stake.name}</td>
-                <td className="px-4 py-3 text-foreground">
-                  {stake.min} / {stake.max}
+                <td className="px-4 py-3 tabular-nums text-foreground">
+                  {formatAmount(stake.min)} / {formatAmount(stake.max)}
                 </td>
-                <td className="px-4 py-3 text-muted">{stake.open}</td>
+                <td className="px-4 py-3 tabular-nums text-muted">{formatAmount(stake.open)}</td>
                 <td className="px-4 py-3 text-foreground">{stake.percent}%</td>
                 <td className="px-4 py-3">
                   <span className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${displayClass(stake.status)}`}>

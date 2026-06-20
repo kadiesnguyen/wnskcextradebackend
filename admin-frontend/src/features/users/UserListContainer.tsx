@@ -10,9 +10,11 @@ import { DataTableCell, ActionsCell,
   PageMetaBar,
   PaginationNav,
   RowCheckbox,
+  SelectCell,
   actionsColumn, } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { UserListSkeleton } from "./UserListSkeleton";
 import { useUserActions } from "./useUserActions";
@@ -137,7 +139,6 @@ export function UserListContainer() {
   };
 
   const columns = [
-    { key: "id", label: t("common.id") },
     { key: "username", label: t("common.username") },
     { key: "assets", label: t("common.assets") },
     { key: "status", label: t("common.status") },
@@ -146,11 +147,7 @@ export function UserListContainer() {
     actionsColumn(t),
   ];
 
-  const formatAsset = (value: string | undefined) => {
-    const num = Number(value ?? 0);
-    if (Number.isNaN(num)) return "0";
-    return num.toLocaleString("vi-VN", { maximumFractionDigits: 4 });
-  };
+  const formatAsset = (value: string | undefined) => formatAmount(value ?? 0);
 
   const renderVerification = (user: AdminUser) => {
     const rz = user.rzstatus ?? 0;
@@ -225,17 +222,16 @@ export function UserListContainer() {
               const busy = pendingActionId === user.id;
               return (
                 <tr key={user.id}>
-                  <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(user.id)} onChange={() => selection.toggleOne(user.id)} label={user.username} /></td>
-                  <td className="px-4 py-3">{user.id}</td>
-                  <td className="px-4 py-3 font-medium">{user.username}</td>
-                  <td className="px-4 py-3 text-xs text-muted">
+                  <SelectCell><RowCheckbox checked={selection.isSelected(user.id)} onChange={() => selection.toggleOne(user.id)} label={user.username} /></SelectCell>
+                  <DataTableCell columnKey="username" className="break-all font-medium">{user.username}</DataTableCell>
+                  <DataTableCell columnKey="assets" className="text-xs text-muted">
                     <div>USDT: <span className="text-foreground">{formatAsset(user.usdt)}</span></div>
                     <div>BTC: <span className="text-foreground">{formatAsset(user.btc)}</span></div>
                     <div>ETH: <span className="text-foreground">{formatAsset(user.eth)}</span></div>
-                  </td>
-                  <td className="px-4 py-3">{user.status === 1 ? t("userForm.statusNormal") : t("userForm.statusFreeze")}</td>
-                  <td className="px-4 py-3">{renderVerification(user)}</td>
-                  <td className="px-4 py-3 font-mono text-sm">{user.invit || "—"}</td>
+                  </DataTableCell>
+                  <DataTableCell columnKey="status">{user.status === 1 ? t("userForm.statusNormal") : t("userForm.statusFreeze")}</DataTableCell>
+                  <DataTableCell columnKey="verification">{renderVerification(user)}</DataTableCell>
+                  <DataTableCell columnKey="invit" className="font-mono text-sm">{user.invit || "—"}</DataTableCell>
                   <ActionsCell>
                     <RowActions>
                       <ActionButton disabled={busy} onClick={() => openEdit(user)}>{t("common.edit")}</ActionButton>

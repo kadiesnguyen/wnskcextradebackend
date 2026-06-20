@@ -11,7 +11,7 @@ import { ErrorState } from "@/components/ui/ErrorState";
 import { contractKongykLabel } from "@/lib/i18n/entity-labels";
 import { useI18n } from "@/lib/i18n/useI18n";
 import Link from "next/link";
-import { useCallback, useMemo, useState } from "react";
+import { Suspense, useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ContractOrderList } from "./ContractOrderList";
 import { ContractOrderListSkeleton } from "./ContractOrderListSkeleton";
@@ -19,10 +19,8 @@ import { useContractOrderActions } from "./useContractOrderActions";
 import { useContractOrders } from "./useContractOrders";
 import type { ContractOrder } from "./types";
 import { ContractQueuePanelContainer } from "@/features/trading/queue/ContractQueuePanelContainer";
-import {
-  ContractQueueQuickActions,
-  contractOpsButtonClass,
-} from "@/features/trading/queue/ContractQueueQuickActions";
+import { ContractQueueQuickActions } from "@/features/trading/queue/ContractQueueQuickActions";
+import { contractOpsButtonClass } from "@/features/trading/queue/contract-ops-styles";
 
 type PendingAction = {
   order: ContractOrder;
@@ -33,13 +31,20 @@ type ContractOrderListContainerProps = {
   embedded?: boolean;
 };
 
-export function ContractOrderListContainer({ embedded = false }: ContractOrderListContainerProps) {
-  const { t } = useI18n();
-  const router = useRouter();
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+type ContractOrderListViewProps = {
+  embedded: boolean;
+  page: number;
+  perPage: number;
+  onPageChange?: (page: number) => void;
+};
 
-  const page = Number(searchParams.get("page") ?? "1");
+function ContractOrderListView({
+  embedded,
+  page,
+  perPage,
+  onPageChange,
+}: ContractOrderListViewProps) {
+  const { t } = useI18n();
 
   const [pendingAction, setPendingAction] = useState<PendingAction | null>(null);
   const [pendingSettle, setPendingSettle] = useState<ContractOrder | null>(null);
@@ -48,33 +53,15 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
   const [actionSuccess, setActionSuccess] = useState<string | null>(null);
 
   const queryParams = useMemo(
-    () =>
-      embedded
-        ? { page: 1, per_page: 10 }
-        : {
-            page: page > 0 ? page : 1,
-            per_page: 15,
-          },
-    [embedded, page],
+    () => ({
+      page: page > 0 ? page : 1,
+      per_page: perPage,
+    }),
+    [page, perPage],
   );
 
   const { data, isLoading, isError, error, refetch, isFetching } = useContractOrders(queryParams);
   const { setWinLoss, manualSettle, settleStuck } = useContractOrderActions();
-
-  const updateParams = useCallback(
-    (updates: Record<string, string | null>) => {
-      const next = new URLSearchParams(searchParams.toString());
-      for (const [key, value] of Object.entries(updates)) {
-        if (value === null || value === "") {
-          next.delete(key);
-        } else {
-          next.set(key, value);
-        }
-      }
-      router.push(`${pathname}?${next.toString()}`);
-    },
-    [pathname, router, searchParams],
-  );
 
   const handleConfirm = async () => {
     if (!pendingAction) return;
@@ -151,6 +138,64 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
     </button>
   );
 
+  const confirmDialogs = (
+    <>
+      <ConfirmDialog
+        isOpen={pendingAction !== null}
+        title={t("page.orders.setControlTitle")}
+        message={
+          pendingAction
+            ? t("page.orders.setControlMessage", {
+                id: String(pendingAction.order.id),
+                username: pendingAction.order.username,
+                control: pendingControlLabel,
+              })
+            : ""
+        }
+        confirmLabel={t("common.confirm")}
+        variant={pendingAction?.kongyk === 2 ? "danger" : "default"}
+        isPending={isWinLossPending}
+        onConfirm={handleConfirm}
+        onCancel={() => {
+          if (!isWinLossPending) {
+            setPendingAction(null);
+          }
+        }}
+      />
+      <ConfirmDialog
+        isOpen={pendingSettle !== null}
+        title={t("page.orders.settleTitle")}
+        message={
+          pendingSettle
+            ? t("page.orders.settleMessage", {
+                id: String(pendingSettle.id),
+                username: pendingSettle.username,
+              })
+            : ""
+        }
+        confirmLabel={t("action.settleOrder")}
+        isPending={isSettlePending}
+        onConfirm={handleSettleConfirm}
+        onCancel={() => {
+          if (!isSettlePending) {
+            setPendingSettle(null);
+          }
+        }}
+      />
+      <ConfirmDialog
+        isOpen={pendingSettleStuck}
+        title={t("page.orders.settleStuckTitle")}
+        message={t("page.orders.settleStuckMessage")}
+        confirmLabel={t("action.settleStuckOrders")}
+        isPending={settleStuck.isPending}
+        onConfirm={handleSettleStuckConfirm}
+        onCancel={() => {
+          if (!settleStuck.isPending) setPendingSettleStuck(false);
+        }}
+      />
+    </>
+  );
+
   const listContent = (
     <>
       {actionSuccess ? (
@@ -193,10 +238,10 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
               setPendingSettle(order);
             }}
           />
-          {!embedded && meta ? (
+          {!embedded && meta && onPageChange ? (
             <PaginationNav
               meta={meta}
-              onPageChange={(p) => updateParams({ page: String(p) })}
+              onPageChange={onPageChange}
               isFetching={isFetching}
             />
           ) : null}
@@ -225,59 +270,7 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
           </div>
         </div>
         {listContent}
-        <ConfirmDialog
-          isOpen={pendingAction !== null}
-          title={t("page.orders.setControlTitle")}
-          message={
-            pendingAction
-              ? t("page.orders.setControlMessage", {
-                  id: String(pendingAction.order.id),
-                  username: pendingAction.order.username,
-                  control: pendingControlLabel,
-                })
-              : ""
-          }
-          confirmLabel={t("common.confirm")}
-          variant={pendingAction?.kongyk === 2 ? "danger" : "default"}
-          isPending={isWinLossPending}
-          onConfirm={handleConfirm}
-          onCancel={() => {
-            if (!isWinLossPending) {
-              setPendingAction(null);
-            }
-          }}
-        />
-        <ConfirmDialog
-          isOpen={pendingSettle !== null}
-          title={t("page.orders.settleTitle")}
-          message={
-            pendingSettle
-              ? t("page.orders.settleMessage", {
-                  id: String(pendingSettle.id),
-                  username: pendingSettle.username,
-                })
-              : ""
-          }
-          confirmLabel={t("action.settleOrder")}
-          isPending={isSettlePending}
-          onConfirm={handleSettleConfirm}
-          onCancel={() => {
-            if (!isSettlePending) {
-              setPendingSettle(null);
-            }
-          }}
-        />
-        <ConfirmDialog
-          isOpen={pendingSettleStuck}
-          title={t("page.orders.settleStuckTitle")}
-          message={t("page.orders.settleStuckMessage")}
-          confirmLabel={t("action.settleStuckOrders")}
-          isPending={settleStuck.isPending}
-          onConfirm={handleSettleStuckConfirm}
-          onCancel={() => {
-            if (!settleStuck.isPending) setPendingSettleStuck(false);
-          }}
-        />
+        {confirmDialogs}
       </section>
     );
   }
@@ -300,61 +293,50 @@ export function ContractOrderListContainer({ embedded = false }: ContractOrderLi
         <ContractQueuePanelContainer embedded part="table" />
       </section>
 
-      <ConfirmDialog
-        isOpen={pendingAction !== null}
-        title={t("page.orders.setControlTitle")}
-        message={
-          pendingAction
-            ? t("page.orders.setControlMessage", {
-                id: String(pendingAction.order.id),
-                username: pendingAction.order.username,
-                control: pendingControlLabel,
-              })
-            : ""
-        }
-        confirmLabel={t("common.confirm")}
-        variant={pendingAction?.kongyk === 2 ? "danger" : "default"}
-        isPending={isWinLossPending}
-        onConfirm={handleConfirm}
-        onCancel={() => {
-          if (!isWinLossPending) {
-            setPendingAction(null);
-          }
-        }}
-      />
-
-      <ConfirmDialog
-        isOpen={pendingSettle !== null}
-        title={t("page.orders.settleTitle")}
-        message={
-          pendingSettle
-            ? t("page.orders.settleMessage", {
-                id: String(pendingSettle.id),
-                username: pendingSettle.username,
-              })
-            : ""
-        }
-        confirmLabel={t("action.settleOrder")}
-        isPending={isSettlePending}
-        onConfirm={handleSettleConfirm}
-        onCancel={() => {
-          if (!isSettlePending) {
-            setPendingSettle(null);
-          }
-        }}
-      />
-
-      <ConfirmDialog
-        isOpen={pendingSettleStuck}
-        title={t("page.orders.settleStuckTitle")}
-        message={t("page.orders.settleStuckMessage")}
-        confirmLabel={t("action.settleStuckOrders")}
-        isPending={settleStuck.isPending}
-        onConfirm={handleSettleStuckConfirm}
-        onCancel={() => {
-          if (!settleStuck.isPending) setPendingSettleStuck(false);
-        }}
-      />
+      {confirmDialogs}
     </div>
+  );
+}
+
+function ContractOrderListPaginated() {
+  const router = useRouter();
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const page = Number(searchParams.get("page") ?? "1");
+
+  const updateParams = useCallback(
+    (updates: Record<string, string | null>) => {
+      const next = new URLSearchParams(searchParams.toString());
+      for (const [key, value] of Object.entries(updates)) {
+        if (value === null || value === "") {
+          next.delete(key);
+        } else {
+          next.set(key, value);
+        }
+      }
+      router.push(`${pathname}?${next.toString()}`);
+    },
+    [pathname, router, searchParams],
+  );
+
+  return (
+    <ContractOrderListView
+      embedded={false}
+      page={page}
+      perPage={15}
+      onPageChange={(p) => updateParams({ page: String(p) })}
+    />
+  );
+}
+
+export function ContractOrderListContainer({ embedded = false }: ContractOrderListContainerProps) {
+  if (embedded) {
+    return <ContractOrderListView embedded page={1} perPage={10} />;
+  }
+
+  return (
+    <Suspense fallback={<ContractOrderListSkeleton />}>
+      <ContractOrderListPaginated />
+    </Suspense>
   );
 }

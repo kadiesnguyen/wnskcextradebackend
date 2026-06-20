@@ -39,7 +39,7 @@ export function LatestMembersPanel({
               </div>
               <div className="min-w-0 flex-1">
                 <div className="flex items-center gap-2">
-                  <p className="truncate text-sm font-medium text-foreground">{member.username}</p>
+                  <p className="break-all text-sm font-medium text-foreground">{member.username}</p>
                   {member.is_agent === 1 ? (
                     <span className="shrink-0 rounded-full bg-primary/15 px-1.5 py-0.5 text-xs font-medium uppercase text-primary">
                       {agentBadge}

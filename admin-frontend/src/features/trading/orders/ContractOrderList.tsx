@@ -31,8 +31,6 @@ type ContractOrderListProps = {
   embedded?: boolean;
 };
 
-const fitCell = "admin-table-cell-fit";
-
 function DirectionBadge({ hyzd }: { hyzd: number }) {
   const { t } = useI18n();
   const label = contractHyzdLabel(t, hyzd);
@@ -158,32 +156,36 @@ export function ContractOrderList({
               <tr key={order.id} className="bg-surface transition hover:bg-surface-elevated">
                 <AnnotatedCell
                   label={t("common.username")}
-                  className={`${fitCell} font-medium text-foreground`}
+                  className="font-medium text-foreground"
                 >
                   <span className="break-all">{order.username}</span>
                 </AnnotatedCell>
-                <AnnotatedCell label={t("common.coin")} className={`${fitCell} uppercase text-foreground`}>
+                <AnnotatedCell label={t("common.coin")} className="uppercase text-foreground">
                   {order.coinname}
                 </AnnotatedCell>
-                <AnnotatedCell label={t("common.amount")} className={`${fitCell} text-foreground tabular-nums`}>
+                <AnnotatedCell
+                  label={t("common.amount")}
+                  className="tabular-nums text-foreground"
+                  numeric
+                >
                   {order.num}
                 </AnnotatedCell>
-                <AnnotatedCell label={t("common.direction")} className={fitCell}>
+                <AnnotatedCell label={t("common.direction")}>
                   <DirectionBadge hyzd={order.hyzd} />
                 </AnnotatedCell>
-                <AnnotatedCell label={t("common.control")} className={fitCell}>
+                <AnnotatedCell label={t("common.control")}>
                   <span
                     className={`inline-flex whitespace-nowrap rounded px-2 py-0.5 text-xs font-medium ${kongykStatusClass(order.kongyk)}`}
                   >
                     {controlLabel}
                   </span>
                 </AnnotatedCell>
-                <AnnotatedCell label={t("common.status")} className={`${fitCell} text-muted`}>
+                <AnnotatedCell label={t("common.status")} className="text-muted">
                   <span className="whitespace-nowrap">{statusLabel}</span>
                 </AnnotatedCell>
                 <AnnotatedCell
                   label={t("common.buyTime")}
-                  className={`${fitCell} text-muted tabular-nums`}
+                  className="text-muted tabular-nums"
                 >
                   <span className="whitespace-nowrap" title={buyTimeFull}>
                     {buyTimeCompact}

@@ -9,6 +9,7 @@ import {
 } from "@/components/list/ListPageParts";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -100,7 +101,7 @@ export function DepositListContainer() {
       ? t("page.deposits.confirm.approveMessage", {
           id: String(pendingAction.deposit.id),
           username: pendingAction.deposit.username,
-          amount: pendingAction.deposit.num,
+          amount: formatAmount(pendingAction.deposit.num),
           coin: pendingAction.deposit.coin.toUpperCase(),
         })
       : pendingAction.type === "reject"

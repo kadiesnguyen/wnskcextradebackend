@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter } from "@/components/list/ListPageParts"
 import { contractStatusLabel } from "@/lib/i18n/entity-labels";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { CloseHistorySkeleton } from "./CloseHistorySkeleton";
@@ -18,7 +19,6 @@ export function CloseHistoryContainer() {
   const items = data?.data ?? [];
   const meta = data?.meta;
   const columns = [
-    { key: "id", label: t("common.id"), className: "w-[6%]" },
     { key: "username", label: t("common.username"), className: "w-[22%]" },
     { key: "coinname", label: t("common.coin"), className: "w-[12%]" },
     { key: "num", label: t("common.amount"), className: "w-[10%]" },
@@ -38,10 +38,9 @@ export function CloseHistoryContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
                 <DataTableCell columnKey="coinname">{item.coinname?.toUpperCase()}</DataTableCell>
-                <DataTableCell columnKey="num">{item.num}</DataTableCell>
+                <DataTableCell columnKey="num" className="tabular-nums">{formatAmount(item.num)}</DataTableCell>
                 <DataTableCell columnKey="status_label">
                   {contractStatusLabel(t, item.status)}
                 </DataTableCell>

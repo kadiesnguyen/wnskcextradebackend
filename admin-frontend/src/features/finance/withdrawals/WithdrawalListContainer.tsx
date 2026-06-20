@@ -9,6 +9,7 @@ import {
 } from "@/components/list/ListPageParts";
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useCallback, useMemo, useState } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -100,7 +101,7 @@ export function WithdrawalListContainer() {
       ? t("page.withdrawals.confirm.approveMessage", {
           id: String(pendingAction.withdrawal.id),
           username: pendingAction.withdrawal.username,
-          amount: pendingAction.withdrawal.mum,
+          amount: formatAmount(pendingAction.withdrawal.mum),
           coin: pendingAction.withdrawal.coinname.toUpperCase(),
         })
       : pendingAction.type === "reject"

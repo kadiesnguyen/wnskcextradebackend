@@ -144,6 +144,8 @@ const vi: Dictionary = {
   "auth.signingIn": "Đang đăng nhập…",
 
   "nav.noMenus": "Chưa có menu nào được cấu hình.",
+  "nav.openMenu": "Mở menu điều hướng",
+  "nav.closeMenu": "Đóng menu điều hướng",
   "nav.dashboard": "Bảng điều khiển",
   "nav.users": "Thành viên",
   "nav.agents": "Đại lý",
@@ -253,6 +255,7 @@ const vi: Dictionary = {
   "page.loginLogs.title": "Nhật ký đăng nhập",
   "page.loginLogs.description": "Theo dõi lịch sử đăng nhập của thành viên.",
   "page.loginLogs.noResults": "Không tìm thấy nhật ký",
+  "page.loginLogs.session": "IP / Thời gian",
 
   "page.wallets.title": "Ví người dùng",
   "page.wallets.description": "Danh sách địa chỉ ví on-chain của thành viên.",

@@ -30,9 +30,6 @@ export function DepositPortList({
         <thead className={theadClassName}>
           <tr>
             <th scope="col" className={thClassName}>
-              ID
-            </th>
-            <th scope="col" className={thClassName}>
               Name
             </th>
             <th scope="col" className={thClassName}>
@@ -58,13 +55,10 @@ export function DepositPortList({
 
             return (
               <tr key={item.id} className="bg-surface transition hover:bg-surface-elevated">
-                <td className="px-4 py-3 text-muted">{item.id}</td>
                 <td className="px-4 py-3 font-medium text-foreground">{item.name}</td>
                 <td className="px-4 py-3 text-foreground">{item.coin ?? "—"}</td>
                 <td className="px-4 py-3 text-muted">{item.wallet ?? "—"}</td>
-                <td className="max-w-xs truncate px-4 py-3 text-muted" title={item.address ?? undefined}>
-                  {item.address ?? "—"}
-                </td>
+                <td className="px-4 py-3 break-all text-muted">{item.address ?? "—"}</td>
                 <td className="px-4 py-3">
                   <span
                     className={`inline-flex rounded px-2 py-0.5 text-xs font-medium ${statusClass(item.status)}`}

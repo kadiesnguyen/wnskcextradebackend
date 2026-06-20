@@ -1,7 +1,7 @@
 "use client";
 import { useMemo, useState } from "react";
 import { ActionButton, RowActions, ToolbarActions, useRowSelection } from "@/components/actions";
-import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, actionsColumn } from "@/components/list/ListPageParts"
+import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, SelectCell, actionsColumn } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { useI18n } from "@/lib/i18n/useI18n";
@@ -34,7 +34,7 @@ export function AdminListContainer() {
       setFormOpen(false); setEditingId(null);
     } catch (err) { setFormError(err instanceof Error ? err.message : t("common.saveFailed")); }
   };
-  const columns = [{ key: "id", label: t("common.id") }, { key: "username", label: t("common.username") }, { key: "email", label: t("common.email") }, { key: "nickname", label: t("common.nickname") }, actionsColumn(t)];
+  const columns = [{ key: "username", label: t("common.username") }, { key: "email", label: t("common.email") }, { key: "nickname", label: t("common.nickname") }, actionsColumn(t)];
   return (
     <div className="space-y-6">
       <PageHeader titleKey="page.admins.title" descriptionKey="page.admins.description" action={
@@ -54,11 +54,10 @@ export function AdminListContainer() {
           <DataTable columns={columns} selectable allSelected={selection.allSelected} someSelected={selection.someSelected} onToggleAll={selection.toggleAll}>
             {items.map((item: AdminAccount) => (
               <tr key={item.id}>
-                <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
-                <td className="px-4 py-3">{item.email}</td>
-                <td className="px-4 py-3">{item.nickname}</td>
+                <SelectCell><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></SelectCell>
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
+                <DataTableCell columnKey="email" className="break-all">{item.email}</DataTableCell>
+                <DataTableCell columnKey="nickname">{item.nickname}</DataTableCell>
                 <ActionsCell><RowActions><ActionButton onClick={() => { setEditingId(item.id); setFormOpen(true); }}>{t("common.edit")}</ActionButton></RowActions></ActionsCell>
               </tr>
             ))}

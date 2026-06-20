@@ -5,6 +5,7 @@ import {
   tableClassName,
 } from "@/components/list/TableShell";
 import { billStLabel } from "@/lib/i18n/entity-labels";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { formatDashboardTimestamp } from "../format";
 import { DashboardCard } from "./DashboardCard";
@@ -70,9 +71,7 @@ export function RecentTransactionsTable({
                     label={columns.user}
                     className="min-w-0 font-medium text-foreground"
                   >
-                    <span className="block truncate" title={tx.username}>
-                      {tx.username}
-                    </span>
+                    <span className="break-all">{tx.username}</span>
                   </AnnotatedCell>
                   <AnnotatedCell
                     label={columns.amount}
@@ -84,20 +83,18 @@ export function RecentTransactionsTable({
                       }
                     >
                       {tx.st === 2 ? "−" : "+"}
-                      {tx.num}
+                      {formatAmount(tx.num)}
                     </span>
                   </AnnotatedCell>
                   <AnnotatedCell
                     label={columns.coin}
                     className="hidden min-w-0 text-xs uppercase text-muted md:table-cell"
                   >
-                    <span className="block truncate" title={tx.coinname}>
-                      {tx.coinname}
-                    </span>
+                    {tx.coinname}
                   </AnnotatedCell>
                   <AnnotatedCell label={columns.type} className="min-w-0">
                     <span
-                      className={`inline-flex max-w-full truncate rounded-full px-2 py-0.5 text-xs font-medium ${
+                      className={`inline-flex rounded-full px-2 py-0.5 text-xs font-medium ${
                         tx.st === 1
                           ? "bg-success/15 text-success"
                           : tx.st === 2
@@ -112,9 +109,7 @@ export function RecentTransactionsTable({
                     label={columns.time}
                     className="hidden min-w-0 text-xs tabular-nums text-muted lg:table-cell"
                   >
-                    <span className="block truncate" title={formatDashboardTimestamp(tx.addtime)}>
-                      {formatDashboardTimestamp(tx.addtime)}
-                    </span>
+                    {formatDashboardTimestamp(tx.addtime)}
                   </AnnotatedCell>
                 </tr>
               ))}

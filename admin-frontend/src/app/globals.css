@@ -125,26 +125,27 @@ body {
 }
 
 /* Responsive admin tables — mobile card rows, desktop fixed table (DESIGN.md v4.1) */
-/* Desktop: clip long cell text instead of overlapping adjacent columns */
+/* Desktop: wrap long cell text — never clip with ellipsis (admin policy) */
 @media (min-width: 768px) {
   .admin-responsive-table tbody td {
-    max-width: 0;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    white-space: nowrap;
+    overflow: visible;
+    white-space: normal;
+    overflow-wrap: anywhere;
+    word-break: break-word;
   }
 
-  .admin-responsive-table td.admin-table-actions {
-    max-width: none;
+  .admin-responsive-table tbody td.admin-table-actions {
     overflow: visible;
     white-space: normal;
   }
 
-  /* Opt-in: show full cell content within table-fixed column width (DESIGN.md) */
-  .admin-responsive-table tbody td.admin-table-cell-fit {
+  .admin-responsive-table tbody td.admin-table-select,
+  .admin-responsive-table thead th.admin-table-select {
+    width: 2.75rem;
     max-width: none;
     overflow: visible;
     white-space: nowrap;
+    word-break: normal;
   }
 }
 

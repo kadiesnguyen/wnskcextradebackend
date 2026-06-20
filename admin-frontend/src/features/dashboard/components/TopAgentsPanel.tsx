@@ -36,8 +36,8 @@ export function TopAgentsPanel({ title, viewAllLabel, agents, emptyLabel }: TopA
                 {index + 1}
               </span>
               <div className="min-w-0 flex-1">
-                <p className="truncate text-sm font-medium text-foreground">{agent.username}</p>
-                <p className="truncate text-xs text-muted">
+                <p className="break-all text-sm font-medium text-foreground">{agent.username}</p>
+                <p className="break-all text-xs text-muted">
                   {agent.invit ? `#${agent.invit}` : "—"}
                 </p>
               </div>

@@ -4,10 +4,8 @@ import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useState } from "react";
 import type { QueueAction } from "./types";
+import { contractOpsButtonClass } from "./contract-ops-styles";
 import { useContractQueueActions } from "./useContractQueueActions";
-
-export const contractOpsButtonClass =
-  "rounded px-3 py-1.5 text-sm font-medium transition hover:opacity-90 disabled:opacity-40";
 
 export function ContractQueueQuickActions() {
   const { t } = useI18n();

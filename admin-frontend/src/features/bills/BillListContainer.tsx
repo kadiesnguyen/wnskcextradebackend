@@ -2,9 +2,10 @@
 
 import { useMemo, useState } from "react";
 import { ActionButton, ToolbarActions, useRowSelection } from "@/components/actions";
-import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter } from "@/components/list/ListPageParts"
+import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, SelectCell, UsernameFilter } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { BillListSkeleton } from "./BillListSkeleton";
@@ -38,7 +39,6 @@ export function BillListContainer({
   const selection = useRowSelection(items);
 
   const columns = [
-    { key: "id", label: t("common.id") },
     { key: "username", label: t("common.username") },
     { key: "coinname", label: t("common.coin") },
     { key: "num", label: t("common.amount") },
@@ -76,14 +76,13 @@ export function BillListContainer({
           <DataTable columns={columns} selectable allSelected={selection.allSelected} someSelected={selection.someSelected} onToggleAll={selection.toggleAll}>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
-                <td className="px-4 py-3">{item.coinname?.toUpperCase()}</td>
-                <td className="px-4 py-3">{item.num}</td>
-                <td className="px-4 py-3">{item.st_label}</td>
-                <td className="px-4 py-3">{item.remark ?? "—"}</td>
-                <td className="px-4 py-3">{item.addtime}</td>
+                <SelectCell><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></SelectCell>
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
+                <DataTableCell columnKey="coinname">{item.coinname?.toUpperCase()}</DataTableCell>
+                <DataTableCell columnKey="num" className="tabular-nums">{formatAmount(item.num)}</DataTableCell>
+                <DataTableCell columnKey="st_label">{item.st_label}</DataTableCell>
+                <DataTableCell columnKey="remark">{item.remark ?? "—"}</DataTableCell>
+                <DataTableCell columnKey="addtime">{item.addtime}</DataTableCell>
               </tr>
             ))}
           </DataTable>

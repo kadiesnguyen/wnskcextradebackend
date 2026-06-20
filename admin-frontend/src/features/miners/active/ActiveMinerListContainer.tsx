@@ -2,11 +2,13 @@
 import { useMemo, useState } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { ActionButton, ToolbarActions, useRowSelection } from "@/components/actions";
-import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
+import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, RowCheckbox, SelectCell, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
+import { formatCompactTimestamp } from "@/features/trading/lib/format";
 import { ActiveMinerListSkeleton } from "./ActiveMinerListSkeleton";
 import { updateMinerOrderStatus } from "./useMinerOrderActions";
 import { useMinerRows } from "./useMiners";
@@ -25,7 +27,6 @@ export function ActiveMinerListContainer() {
   const meta = data?.meta;
   const selection = useRowSelection(items);
   const columns = [
-    { key: "id", label: t("common.id") },
     { key: "username", label: t("common.username") },
     { key: "detail", label: "Detail" },
     { key: "amount", label: t("common.amount") },
@@ -51,12 +52,13 @@ export function ActiveMinerListContainer() {
           <DataTable columns={columns} selectable allSelected={selection.allSelected} someSelected={selection.someSelected} onToggleAll={selection.toggleAll}>
             {items.map((item) => (
               <tr key={item.id}>
-                <td className="px-4 py-3"><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></td>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
-                <td className="px-4 py-3">{item.kjtitle ?? item.ktitle ?? item.status_label ?? "—"}</td>
-                <td className="px-4 py-3">{item.num ?? "—"} {item.coin ?? ""}</td>
-                <td className="px-4 py-3">{item.addtime}</td>
+                <SelectCell><RowCheckbox checked={selection.isSelected(item.id)} onChange={() => selection.toggleOne(item.id)} /></SelectCell>
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
+                <DataTableCell columnKey="detail">{item.kjtitle ?? item.ktitle ?? item.status_label ?? "—"}</DataTableCell>
+                <DataTableCell columnKey="amount" className="tabular-nums">
+                  {item.num != null ? formatAmount(item.num) : "—"} {item.coin ?? ""}
+                </DataTableCell>
+                <DataTableCell columnKey="addtime">{formatCompactTimestamp(item.addtime)}</DataTableCell>
               </tr>
             ))}
           </DataTable>

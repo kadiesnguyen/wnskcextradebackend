@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ErrorState } from "@/components/ui/ErrorState";
 import { DataTableCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter } from "@/components/list/ListPageParts"
 import { transferStatusLabel } from "@/lib/i18n/entity-labels";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { TransferListSkeleton } from "./TransferListSkeleton";
@@ -18,7 +19,7 @@ export function TransferListContainer() {
   const items = data?.data ?? [];
   const meta = data?.meta;
   const columns = [
-    { key: "id", label: t("common.id") }, { key: "username", label: t("common.username") },
+    { key: "username", label: t("common.username") },
     { key: "from", label: "From" }, { key: "to", label: "To" },
     { key: "amount", label: t("common.amount") }, { key: "status_label", label: t("common.status") },
     { key: "addtime", label: t("common.time") },
@@ -36,15 +37,14 @@ export function TransferListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
-                <DataTableCell columnKey="from">
-                  {item.from_coin?.toUpperCase()} {item.from_amount}
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
+                <DataTableCell columnKey="from" className="tabular-nums">
+                  {item.from_coin?.toUpperCase()} {formatAmount(item.from_amount)}
                 </DataTableCell>
-                <DataTableCell columnKey="to">
-                  {item.to_coin?.toUpperCase()} {item.to_amount}
+                <DataTableCell columnKey="to" className="tabular-nums">
+                  {item.to_coin?.toUpperCase()} {formatAmount(item.to_amount)}
                 </DataTableCell>
-                <DataTableCell columnKey="amount">{item.convert_rate}</DataTableCell>
+                <DataTableCell columnKey="amount" className="tabular-nums">{formatAmount(item.convert_rate)}</DataTableCell>
                 <DataTableCell columnKey="status_label">
                   {transferStatusLabel(t, item.status)}
                 </DataTableCell>

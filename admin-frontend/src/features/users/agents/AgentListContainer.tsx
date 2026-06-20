@@ -23,7 +23,6 @@ export function AgentListContainer() {
   const items = data?.data ?? [];
   const meta = data?.meta;
   const columns = [
-    { key: "id", label: t("common.id") },
     { key: "username", label: t("common.username") },
     { key: "invit", label: t("common.invite") },
     { key: "one", label: t("common.level1") },
@@ -45,12 +44,11 @@ export function AgentListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username}</DataTableCell>
-                <td className="px-4 py-3">{item.invit ?? "—"}</td>
-                <td className="px-4 py-3">{item.one ?? 0}</td>
-                <td className="px-4 py-3">{item.two ?? 0}</td>
-                <td className="px-4 py-3">{item.all ?? 0}</td>
+                <DataTableCell columnKey="username" className="break-all">{item.username}</DataTableCell>
+                <DataTableCell columnKey="invit">{item.invit ?? "—"}</DataTableCell>
+                <DataTableCell columnKey="one">{item.one ?? 0}</DataTableCell>
+                <DataTableCell columnKey="two">{item.two ?? 0}</DataTableCell>
+                <DataTableCell columnKey="all">{item.all ?? 0}</DataTableCell>
                 <ActionsCell>
                   <RowActions>
                     <Link href={`/users?username=${encodeURIComponent(item.username)}`} className="rounded border border-border px-2.5 py-1 text-xs font-medium text-primary hover:bg-surface-elevated">{t("common.edit")}</Link>

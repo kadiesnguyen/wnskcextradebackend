@@ -1,5 +1,6 @@
 "use client";
 
+import { formatTableAmountValue } from "@/lib/format-number";
 import { createContext, useContext } from "react";
 import type { DataTableColumn } from "./ListPageParts";
 
@@ -25,7 +26,7 @@ export function TableShell({ children, className = "" }: TableShellProps) {
 }
 
 export const tableClassName =
-  "admin-responsive-table w-full table-fixed divide-y divide-border text-left text-sm";
+  "admin-responsive-table w-full table-auto divide-y divide-border text-left text-sm";
 
 export const thClassName =
   "px-2 py-2 font-medium text-muted first:pl-3 last:pr-3 md:px-3 md:py-2.5 md:first:pl-4 md:last:pr-4";
@@ -58,6 +59,10 @@ export function DataTableCell({
   const columns = useTableColumns();
   const column = columns.find((col) => col.key === columnKey);
   const label = column?.label ?? "";
+  const display =
+    typeof children === "number" || typeof children === "string"
+      ? formatTableAmountValue(columnKey, children)
+      : children;
 
   return (
     <td
@@ -66,7 +71,7 @@ export function DataTableCell({
         actions ? "admin-table-actions" : ""
       } ${className}`.trim()}
     >
-      {children}
+      {display}
     </td>
   );
 }
@@ -76,6 +81,8 @@ type AnnotatedCellProps = {
   children: React.ReactNode;
   className?: string;
   actions?: boolean;
+  /** When true, numeric children are formatted with thousands separators and decimals. */
+  numeric?: boolean;
 };
 
 /** For standalone tables outside DataTable (e.g. ContractOrderList). */
@@ -84,7 +91,13 @@ export function AnnotatedCell({
   children,
   className = "",
   actions = false,
+  numeric = false,
 }: AnnotatedCellProps) {
+  const display =
+    numeric && (typeof children === "number" || typeof children === "string")
+      ? formatTableAmountValue("num", children)
+      : children;
+
   return (
     <td
       data-label={label}
@@ -92,7 +105,7 @@ export function AnnotatedCell({
         actions ? "admin-table-actions" : ""
       } ${className}`.trim()}
     >
-      {children}
+      {display}
     </td>
   );
 }

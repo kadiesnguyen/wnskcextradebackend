@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { ActionButton, RowActions } from "@/components/actions";
 import { DataTableCell, ActionsCell, DataTable, EmptyState, PageHeader, PageMetaBar, PaginationNav, UsernameFilter, actionsColumn } from "@/components/list/ListPageParts"
 import { ErrorState } from "@/components/ui/ErrorState";
+import { formatAmount } from "@/lib/format-number";
 import { useI18n } from "@/lib/i18n/useI18n";
 import { useUrlParams } from "@/hooks/useUrlParams";
 import { AssetListSkeleton } from "./AssetListSkeleton";
@@ -36,7 +37,6 @@ export function AssetListContainer() {
   };
 
   const columns = [
-    { key: "id", label: t("common.id") },
     { key: "username", label: t("common.username") },
     { key: "usdt", label: "USDT" },
     { key: "btc", label: "BTC" },
@@ -58,11 +58,10 @@ export function AssetListContainer() {
           <DataTable columns={columns}>
             {items.map((item) => (
               <tr key={item.id}>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <DataTableCell columnKey="username">{item.username ?? "—"}</DataTableCell>
-                <td className="px-4 py-3">{item.usdt}</td>
-                <td className="px-4 py-3">{item.btc}</td>
-                <td className="px-4 py-3">{item.eth}</td>
+                <DataTableCell columnKey="username" className="break-all">{item.username ?? "—"}</DataTableCell>
+                <DataTableCell columnKey="usdt" className="tabular-nums">{formatAmount(item.usdt)}</DataTableCell>
+                <DataTableCell columnKey="btc" className="tabular-nums">{formatAmount(item.btc)}</DataTableCell>
+                <DataTableCell columnKey="eth" className="tabular-nums">{formatAmount(item.eth)}</DataTableCell>
                 <ActionsCell><RowActions><ActionButton onClick={() => openEdit(item)}>{t("common.edit")}</ActionButton></RowActions></ActionsCell>
               </tr>
             ))}

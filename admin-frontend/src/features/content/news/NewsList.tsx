@@ -20,9 +20,6 @@ export function NewsList({ items, onEdit, onDelete, pendingDeleteId }: NewsListP
         <thead className={theadClassName}>
           <tr>
             <th scope="col" className={thClassName}>
-              ID
-            </th>
-            <th scope="col" className={thClassName}>
               Title
             </th>
             <th scope="col" className={thClassName}>
@@ -42,7 +39,6 @@ export function NewsList({ items, onEdit, onDelete, pendingDeleteId }: NewsListP
 
             return (
               <tr key={item.id} className="bg-surface transition hover:bg-surface-elevated">
-                <td className="px-4 py-3 text-muted">{item.id}</td>
                 <td className="px-4 py-3 font-medium text-foreground">{item.title}</td>
                 <td className="px-4 py-3">
                   <span

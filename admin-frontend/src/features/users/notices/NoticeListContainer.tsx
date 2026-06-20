@@ -9,6 +9,7 @@ import { DataTableCell, DataTable,
   PageMetaBar,
   PaginationNav,
   RowCheckbox,
+  SelectCell,
   UsernameFilter, } from "@/components/list/ListPageParts"
 import { ConfirmDialog } from "@/components/ui/ConfirmDialog";
 import { ErrorState } from "@/components/ui/ErrorState";
@@ -38,12 +39,6 @@ function formatDateTime(value: string): string {
   } catch {
     return value;
   }
-}
-
-function truncate(text: string, max = 80): string {
-  const normalized = text.replace(/\s+/g, " ").trim();
-  if (normalized.length <= max) return normalized;
-  return `${normalized.slice(0, max)}…`;
 }
 
 export function NoticeListContainer({
@@ -81,7 +76,6 @@ export function NoticeListContainer({
   const selection = useRowSelection(items);
 
   const columns = [
-    { key: "id", label: t("common.id") },
     { key: "account", label: t("common.username") },
     { key: "title", label: t("common.title") },
     { key: "content", label: t("common.content") },
@@ -164,18 +158,17 @@ export function NoticeListContainer({
                 className="cursor-pointer hover:bg-surface-elevated/40"
                 onClick={() => setViewNotice(item)}
               >
-                <td className="px-4 py-3" onClick={(e) => e.stopPropagation()}>
+                <SelectCell onClick={(e) => e.stopPropagation()}>
                   <RowCheckbox
                     checked={selection.isSelected(item.id)}
                     onChange={() => selection.toggleOne(item.id)}
                   />
-                </td>
-                <DataTableCell columnKey="id">{item.id}</DataTableCell>
-                <td className="px-4 py-3 font-medium">{item.account}</td>
-                <td className="px-4 py-3">{item.title}</td>
-                <td className="px-4 py-3 max-w-xs text-sm text-muted">{truncate(item.content)}</td>
-                <td className="px-4 py-3 whitespace-nowrap text-sm">{formatDateTime(item.addtime)}</td>
-                <td className="px-4 py-3">{renderReadStatus(item)}</td>
+                </SelectCell>
+                <DataTableCell columnKey="account" className="break-all font-medium">{item.account}</DataTableCell>
+                <DataTableCell columnKey="title">{item.title}</DataTableCell>
+                <DataTableCell columnKey="content" className="text-sm text-muted">{item.content}</DataTableCell>
+                <DataTableCell columnKey="addtime" className="whitespace-nowrap text-sm">{formatDateTime(item.addtime)}</DataTableCell>
+                <DataTableCell columnKey="user_view">{renderReadStatus(item)}</DataTableCell>
               </tr>
             ))}
           </DataTable>
