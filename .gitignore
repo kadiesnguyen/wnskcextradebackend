@@ -1,0 +1,47 @@
+# Local env & secrets
+.env
+.env.*
+!.env.example
+!.env.production.example
+!.env.local.example
+laravel/.env
+laravel/.env.*
+!laravel/.env.example
+!laravel/.env.production.example
+admin-frontend/.env.local
+admin-frontend/.env.production.local
+
+# Migration loop local state
+.migration-loop-state.json
+
+# Dependencies & build output
+**/node_modules/
+**/vendor/
+admin-frontend/.next/
+admin-frontend/out/
+laravel/public/build/
+laravel/public/hot
+laravel/public/storage
+
+# Laravel runtime
+laravel/storage/logs/
+laravel/storage/framework/cache/data/
+laravel/storage/framework/sessions/*
+laravel/storage/framework/views/*
+!laravel/storage/framework/sessions/.gitignore
+!laravel/storage/framework/views/.gitignore
+laravel/storage/*.key
+laravel/bootstrap/cache/*.php
+!laravel/bootstrap/cache/.gitignore
+
+# IDE / tooling
+.idea/
+.vscode/
+.cursor/
+**/.codegraph/
+*.log
+.DS_Store
+Thumbs.db
+
+# Archives
+*.zip

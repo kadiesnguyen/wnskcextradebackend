@@ -1,0 +1,164 @@
+{
+  "version": 1,
+  "phases": {
+    "0": {
+      "name": "Foundation",
+      "tasks": {
+        "laravel_admin_routes": {
+          "title": "Admin API routes scaffold",
+          "prompt": "Đảm bảo routes/admin.php có login, me, logout, menus, dashboard/stats. Middleware auth:admin + check.admin.status."
+        },
+        "laravel_admin_auth": {
+          "title": "Admin JWT auth",
+          "prompt": "Admin guard JWT, login MD5 legacy, Admin model Authenticatable+JWTSubject."
+        },
+        "laravel_rbac_service": {
+          "title": "RBAC services",
+          "prompt": "AdminPermissionService + AdminMenuService port từ ThinkPHP tw_auth_* và tw_menu."
+        },
+        "laravel_dashboard_api": {
+          "title": "Dashboard stats API",
+          "prompt": "GET /api/admin/dashboard/stats — port stats từ IndexController ThinkPHP."
+        },
+        "admin_frontend_scaffold": {
+          "title": "Admin Next.js scaffold",
+          "prompt": "Backend/admin-frontend: login, AppShell, dashboard. Tuân thủ frontend-ui-engineering.md."
+        },
+        "docker_db": {
+          "title": "Local Docker MySQL",
+          "prompt": "docker-compose mysql + api, setup-db.sh import dump."
+        },
+        "source_download": {
+          "title": "Source từ server",
+          "prompt": "Backend/laravel, thinkphp-admin, database dump đã tải về."
+        }
+      }
+    },
+    "1": {
+      "name": "Dashboard + Users",
+      "tasks": {
+        "users_api": {
+          "title": "Users admin API",
+          "prompt": "GET/PUT users, status, coins — port UserController ThinkPHP. Files trong app/Http/Controllers/Admin/."
+        },
+        "users_frontend": {
+          "title": "Users list UI",
+          "prompt": "Backend/admin-frontend: trang /users với DataTable, filter username/status, loading/error/empty states. TanStack Query gọi /api/admin/users."
+        },
+        "agents_api": {
+          "title": "Agents API",
+          "prompt": "Port User/agent, setagent, cancelagent từ ThinkPHP sang Laravel Admin API."
+        },
+        "admins_api": {
+          "title": "Admin accounts API",
+          "prompt": "Port User/admin, adminEdit, adminStatus — quản lý tw_admin + auth groups."
+        },
+        "support_notices": {
+          "title": "Support + Notices API",
+          "prompt": "Port noticelist, sendnotice, online chat từ ThinkPHP UserController."
+        }
+      }
+    },
+    "2": {
+      "name": "Finance",
+      "tasks": {
+        "deposits_api": {
+          "title": "Deposits API",
+          "prompt": "Port Finance/myzr, adoptzr, rejectzr — nạp tiền approve/reject."
+        },
+        "withdrawals_api": {
+          "title": "Withdrawals API",
+          "prompt": "Port Finance/myzc, adopttb, reject — rút tiền approve/reject."
+        },
+        "transfers_api": {
+          "title": "Transfers API",
+          "prompt": "Port Finance/fund — lịch sử chuyển khoản."
+        },
+        "finance_frontend": {
+          "title": "Finance UI",
+          "prompt": "Admin frontend: /finance/deposits, /finance/withdrawals với approve dialog có lý do bắt buộc."
+        }
+      }
+    },
+    "3": {
+      "name": "Trading",
+      "tasks": {
+        "contract_orders_api": {
+          "title": "Contract orders API",
+          "prompt": "Port Trade/index, gethyorder, setwinloss, settzstatus — lệnh hợp đồng."
+        },
+        "contract_queue_api": {
+          "title": "Result queue API",
+          "prompt": "Port resultQueuePanel, resultQueueAction."
+        },
+        "spot_orders_api": {
+          "title": "Spot/BB orders API",
+          "prompt": "Port bbsjlist, bbxjlist, bbsetting."
+        },
+        "contract_settings_api": {
+          "title": "Contract settings API",
+          "prompt": "Port sethy, market, marketEdit — cấu hình spoofing."
+        },
+        "trading_frontend": {
+          "title": "Trading UI",
+          "prompt": "Admin frontend: /trading/orders, /trading/settings, /trading/queue."
+        }
+      }
+    },
+    "4": {
+      "name": "Staking + Miner + Content",
+      "tasks": {
+        "staking_api": {
+          "title": "Staking API",
+          "prompt": "Port Issue/index, edit, log từ ThinkPHP."
+        },
+        "miner_api": {
+          "title": "Miner API",
+          "prompt": "Port Kuangm/* và Orepool/* controllers."
+        },
+        "content_api": {
+          "title": "News + Articles API",
+          "prompt": "Port News/* và Article/* controllers."
+        },
+        "content_frontend": {
+          "title": "Content UI",
+          "prompt": "Admin frontend: /content/news, /staking, /miners pages."
+        }
+      }
+    },
+    "5": {
+      "name": "System Settings",
+      "tasks": {
+        "config_api": {
+          "title": "Site config API",
+          "prompt": "Port Config/index, qita, coin, depositport."
+        },
+        "navigation_api": {
+          "title": "Navigation API",
+          "prompt": "Port daohang, dhfooter, ctmarket, marketo."
+        },
+        "settings_frontend": {
+          "title": "Settings UI",
+          "prompt": "Admin frontend: /settings/* pages."
+        }
+      }
+    },
+    "6": {
+      "name": "Cutover + Remove ThinkPHP",
+      "tasks": {
+        "parity_test": {
+          "title": "Parity testing",
+          "prompt": "So sánh admin mới vs ThinkPHP trên local DB — login, users, finance, trading flows."
+        },
+        "deploy_config": {
+          "title": "Deploy config",
+          "prompt": "Chuẩn bị deploy admin frontend + Laravel admin routes lên server."
+        },
+        "remove_thinkphp": {
+          "title": "Remove ThinkPHP",
+          "prompt": "Sau parity OK: xóa Backend/thinkphp-admin, cập nhật docs, archive trên server."
+        }
+      }
+    }
+  }
+}

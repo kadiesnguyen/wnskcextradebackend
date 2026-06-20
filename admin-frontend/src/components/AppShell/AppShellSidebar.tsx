@@ -1,0 +1,139 @@
+"use client";
+
+import Link from "next/link";
+import { usePathname } from "next/navigation";
+import { useI18n } from "@/lib/i18n/useI18n";
+import {
+  DASHBOARD_PATH,
+  MENU_BADGE_BY_PATH,
+  resolveGroupLabelKey,
+  resolveMenuLabelKey,
+  resolveMenuPath,
+  resolveMenuTree,
+} from "@/lib/menu-routes";
+import type { PendingCounts } from "@/lib/pending-counts/api";
+import { usePendingCounts } from "@/lib/pending-counts/usePendingCounts";
+import type { AdminMenuTree } from "@/features/auth/types";
+
+type AppShellSidebarProps = {
+  menuTree: AdminMenuTree;
+};
+
+function formatBadgeCount(count: number): string {
+  return count > 99 ? "99+" : String(count);
+}
+
+function SidebarLink({
+  href,
+  label,
+  isActive,
+  badgeCount,
+}: {
+  href: string;
+  label: string;
+  isActive: boolean;
+  badgeCount?: number;
+}) {
+  const hasBadge = badgeCount !== undefined && badgeCount > 0;
+
+  return (
+    <li>
+      <Link
+        href={href}
+        aria-current={isActive ? "page" : undefined}
+        className={`flex items-center justify-between gap-2 rounded px-3 py-2 text-sm transition ${
+          isActive
+            ? "bg-surface-elevated text-primary"
+            : hasBadge
+              ? "text-danger hover:bg-surface-elevated hover:text-danger"
+              : "text-foreground hover:bg-surface-elevated hover:text-primary"
+        }`}
+      >
+        <span>{label}</span>
+        {hasBadge ? (
+          <span
+            aria-label={`${badgeCount} pending`}
+            className="inline-flex min-w-[1.25rem] shrink-0 items-center justify-center rounded-full bg-danger px-1.5 py-0.5 text-xs font-semibold text-white"
+          >
+            {formatBadgeCount(badgeCount)}
+          </span>
+        ) : null}
+      </Link>
+    </li>
+  );
+}
+
+function badgeForPath(path: string, counts: PendingCounts | undefined): number | undefined {
+  if (!counts) return undefined;
+  const key = MENU_BADGE_BY_PATH[path];
+  return key ? counts[key] : undefined;
+}
+
+export function AppShellSidebar({ menuTree }: AppShellSidebarProps) {
+  const pathname = usePathname();
+  const { t } = useI18n();
+  const { data: pendingData } = usePendingCounts();
+  const pendingCounts = pendingData?.data;
+
+  const groups = Object.entries(resolveMenuTree(menuTree).child);
+  const isDashboardActive =
+    pathname === DASHBOARD_PATH || pathname.startsWith(`${DASHBOARD_PATH}/`);
+
+  return (
+    <aside
+      aria-label="Admin navigation"
+      className="hidden w-56 shrink-0 border-r border-border bg-surface md:block"
+    >
+      <div className="border-b border-border px-4 py-4">
+        <p className="text-xs uppercase tracking-wide text-muted">{t("app.brand")}</p>
+        <p className="text-lg font-semibold text-primary">{t("app.admin")}</p>
+      </div>
+      <nav className="p-3">
+        <ul className="space-y-1" role="list">
+          <li>
+            <SidebarLink
+              href={DASHBOARD_PATH}
+              label={t("nav.dashboard")}
+              isActive={isDashboardActive}
+            />
+          </li>
+
+          {groups.map(([groupName, items]) => (
+            <li key={groupName}>
+              <p className="px-3 pb-1 pt-3 text-xs font-medium uppercase tracking-wide text-muted">
+                {t(resolveGroupLabelKey(groupName))}
+              </p>
+              <ul className="ml-3 space-y-1 border-l border-border pl-3">
+                {items.map((item) => {
+                  const href = resolveMenuPath(item.url);
+                  if (!href) {
+                    return null;
+                  }
+                  const labelKey = resolveMenuLabelKey(item.url);
+                  const label = labelKey ? t(labelKey) : item.title;
+                  const isActive = pathname === href || pathname.startsWith(`${href}/`);
+                  const badgeCount = badgeForPath(href, pendingCounts);
+
+                  return (
+                    <SidebarLink
+                      key={String(item.id)}
+                      href={href}
+                      label={label}
+                      isActive={isActive}
+                      badgeCount={badgeCount}
+                    />
+                  );
+                })}
+              </ul>
+            </li>
+          ))}
+        </ul>
+        {groups.length === 0 ? (
+          <p className="px-3 py-2 text-xs text-muted" role="status">
+            {t("nav.noMenus")}
+          </p>
+        ) : null}
+      </nav>
+    </aside>
+  );
+}
