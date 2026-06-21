@@ -151,7 +151,11 @@ class HyorderSettlementService
     ): void {
         $updateData['is_win'] = 1;
         $updateData['ploss'] = $profitAmount;
-        $this->addUserBalance((int) $order->uid, $winPayout, 'Trade win bonus');
+        $this->addUserBalance(
+            (int) $order->uid,
+            $winPayout,
+            'Trade win bonus #' . $order->id,
+        );
     }
 
     protected function resolveWinPayout(Hyorder $order): float
@@ -179,7 +183,11 @@ class HyorderSettlementService
         $lossAmount = $order->num * $order->hybl / 100;
         $refundAmount = $order->num - $lossAmount;
         $updateData['ploss'] = $lossAmount;
-        $this->addUserBalance((int) $order->uid, (float) $refundAmount, 'Trade loss refund');
+        $this->addUserBalance(
+            (int) $order->uid,
+            (float) $refundAmount,
+            'Trade loss refund #' . $order->id,
+        );
     }
 
     /**
@@ -268,8 +276,20 @@ class HyorderSettlementService
             throw new \RuntimeException("User wallet not found for user {$userId}.");
         }
 
-        $userCoin->increment('usdt', $amount);
-        $user = User::query()->find($userId);
+        $before = (float) $userCoin->usdt;
+        $updated = UserCoin::query()->where('userid', $userId)->increment('usdt', $amount);
+
+        if (!$updated) {
+            throw new \RuntimeException("Failed to credit user {$userId} wallet.");
+        }
+
+        $after = (float) UserCoin::query()->where('userid', $userId)->value('usdt');
+
+        if ($after + 0.0001 < $before + $amount) {
+            throw new \RuntimeException("Wallet credit verification failed for user {$userId}.");
+        }
+
+        $user = User::query()->find($userId, ['id', 'username']);
 
         if (!$user) {
             throw new \RuntimeException("User not found: {$userId}.");
@@ -280,7 +300,7 @@ class HyorderSettlementService
             'username' => $user->username,
             'num' => $amount,
             'coinname' => 'usdt',
-            'afternum' => $userCoin->usdt,
+            'afternum' => $after,
             'type' => 4,
             'addtime' => now()->format('Y-m-d H:i:s'),
             'st' => 1,
