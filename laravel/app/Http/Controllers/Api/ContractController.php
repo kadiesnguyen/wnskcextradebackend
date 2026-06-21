@@ -9,8 +9,8 @@ use App\Models\Hyorder;
 use App\Models\Hysetting;
 use App\Models\User;
 use App\Models\UserCoin;
+use App\Services\HyorderSettlementService;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Validator;
@@ -492,10 +492,9 @@ class ContractController extends Controller
         }
     }
 
-    public function checkOrder(Request $request)
+    public function checkOrder(Request $request, HyorderSettlementService $settlement)
     {
         try {
-            // Validate request
             $validator = Validator::make($request->all(), [
                 'id' => 'required|integer|exists:tw_hyorder,id',
             ]);
@@ -507,10 +506,8 @@ class ContractController extends Controller
                 ], 422);
             }
 
-            // Get authenticated user
             $user = JWTAuth::user();
 
-            // Get order
             $order = Hyorder::where('id', $request->id)
                 ->where('uid', $user->id)
                 ->first();
@@ -522,9 +519,17 @@ class ContractController extends Controller
                 ], 404);
             }
 
-            Artisan::call('app:process-orders');
+            if ((int) $order->status === 1 && (int) $order->intselltime <= now()->timestamp + 10) {
+                try {
+                    $settlement->settle($order);
+                } catch (\Throwable $e) {
+                    \Log::warning('checkOrder settlement skipped', [
+                        'order_id' => $order->id,
+                        'error' => $e->getMessage(),
+                    ]);
+                }
+            }
 
-            // Refresh the order to get updated data
             $order->refresh();
 
             return response()->json([
@@ -532,8 +537,12 @@ class ContractController extends Controller
                 'message' => 'Order retrieved successfully',
                 'data' => $order->toArray(),
             ], 200);
-        } catch (\Exception $e) {
-            \Log::error('Order check failed', ['error' => $e->getMessage()]);
+        } catch (\Throwable $e) {
+            \Log::error('Order check failed', [
+                'order_id' => $request->input('id'),
+                'error' => $e->getMessage(),
+            ]);
+
             return response()->json([
                 'status' => false,
                 'message' => 'Failed to check order. Try again later.',
