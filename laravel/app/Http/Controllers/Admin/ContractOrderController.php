@@ -209,7 +209,13 @@ class ContractOrderController extends Controller
         $items = collect($paginator->items());
         $balanceMap = $balances->forOrders($items);
 
-        $request->attributes->set('contract_order_balance_map', $balanceMap);
+        $items->each(function (Hyorder $order) use ($balanceMap): void {
+            $balance = $balanceMap[(int) $order->id] ?? [];
+
+            $order->setAttribute('balance_before', $balance['balance_before'] ?? null);
+            $order->setAttribute('balance_after', $balance['balance_after'] ?? null);
+            $order->setAttribute('profit_loss', $balance['profit_loss'] ?? null);
+        });
 
         return response()->json([
             'status' => true,

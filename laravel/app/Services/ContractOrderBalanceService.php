@@ -41,6 +41,12 @@ class ContractOrderBalanceService
                 ->where('uid', $order->uid)
                 ->where('type', 4)
                 ->where('id', '>', $buyBill->id)
+                ->where(function ($query) use ($order) {
+                    $query->where('remark', 'like', '%#' . $order->id)
+                        ->orWhereIn('remark', ['Trade win bonus', 'Trade loss refund'])
+                        ->orWhere('remark', 'like', 'Trade win bonus #%')
+                        ->orWhere('remark', 'like', 'Trade loss refund #%');
+                })
                 ->orderBy('id')
                 ->first(['num', 'afternum']);
 
