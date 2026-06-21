@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\ListContractOrdersRequest;
 use App\Http\Requests\Admin\SetContractWinLossRequest;
 use App\Http\Resources\Admin\ContractOrderResource;
 use App\Models\Hyorder;
+use App\Services\ContractOrderBalanceService;
 use App\Services\HyorderSettlementService;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
@@ -44,9 +45,6 @@ class ContractOrderController extends Controller
         ]);
     }
 
-    /**
-     * Poll for unseen pending contract orders (ThinkPHP Trade/gethyorder).
-     */
     public function pendingCount(): JsonResponse
     {
         $query = Hyorder::query()
@@ -76,9 +74,6 @@ class ContractOrderController extends Controller
         return response()->json($payload);
     }
 
-    /**
-     * Mark unseen pending contract orders as notified (ThinkPHP Trade/settzstatus).
-     */
     public function markNotified(): JsonResponse
     {
         $updated = Hyorder::query()
@@ -101,11 +96,10 @@ class ContractOrderController extends Controller
         return response()->json($payload);
     }
 
-    /**
-     * Set controlled profit/loss for a contract order (ThinkPHP Trade/setwinloss).
-     */
-    public function setWinLoss(SetContractWinLossRequest $request): JsonResponse
-    {
+    public function setWinLoss(
+        SetContractWinLossRequest $request,
+        HyorderSettlementService $settlement,
+    ): JsonResponse {
         $order = Hyorder::query()->find((int) $request->input('id'));
 
         if (!$order) {
@@ -126,15 +120,25 @@ class ContractOrderController extends Controller
             ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
+        $order->refresh();
+
+        if ((int) $order->status === 1 && (int) $order->intselltime <= now()->timestamp + 10) {
+            try {
+                $settlement->settle($order);
+            } catch (\Throwable $e) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $e->getMessage() ?: 'System error.',
+                ], Response::HTTP_INTERNAL_SERVER_ERROR);
+            }
+        }
+
         return response()->json([
             'status' => true,
             'message' => 'Successfully.',
         ]);
     }
 
-    /**
-     * Manually settle a stuck pending order (ThinkPHP Trade/manualApprove).
-     */
     public function manualSettle(int $id, HyorderSettlementService $settlement): JsonResponse
     {
         $order = Hyorder::query()->find($id);
@@ -168,9 +172,6 @@ class ContractOrderController extends Controller
         ]);
     }
 
-    /**
-     * Settle all overdue stuck orders (admin recovery).
-     */
     public function settleStuck(HyorderSettlementService $settlement): JsonResponse
     {
         $result = $settlement->settleDueOrders();
@@ -184,11 +185,10 @@ class ContractOrderController extends Controller
         ]);
     }
 
-    /**
-     * Settled contract orders (ThinkPHP Trade/hylog).
-     */
-    public function closed(ListContractOrdersRequest $request): JsonResponse
-    {
+    public function closed(
+        ListContractOrdersRequest $request,
+        ContractOrderBalanceService $balances,
+    ): JsonResponse {
         $perPage = (int) $request->input('per_page', 15);
         $username = $request->input('username');
         $invit = $request->input('invit');
@@ -206,10 +206,14 @@ class ContractOrderController extends Controller
         }
 
         $paginator = $query->paginate($perPage);
+        $items = collect($paginator->items());
+        $balanceMap = $balances->forOrders($items);
+
+        $request->attributes->set('contract_order_balance_map', $balanceMap);
 
         return response()->json([
             'status' => true,
-            'data' => ContractOrderResource::collection(collect($paginator->items())),
+            'data' => ContractOrderResource::collection($items),
             'meta' => [
                 'current_page' => $paginator->currentPage(),
                 'last_page' => $paginator->lastPage(),

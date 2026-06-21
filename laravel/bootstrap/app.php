@@ -4,6 +4,7 @@ use Illuminate\Auth\AuthenticationException;
 use Illuminate\Foundation\Application;
 use Illuminate\Foundation\Configuration\Exceptions;
 use Illuminate\Foundation\Configuration\Middleware;
+use Illuminate\Http\Exceptions\ThrottleRequestsException;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -29,7 +30,7 @@ return Application::configure(basePath: dirname(__DIR__))
         ]);
 
         $middleware->api([
-            'throttle:60,1',
+            'throttle:api',
             \Illuminate\Routing\Middleware\SubstituteBindings::class,
         ]);
 
@@ -41,5 +42,16 @@ return Application::configure(basePath: dirname(__DIR__))
                 'status' => false,
                 'message' => 'Unauthenticated. Please provide a valid token.',
             ], Response::HTTP_UNAUTHORIZED);
+        });
+
+        $exceptions->render(function (ThrottleRequestsException $e, $request) {
+            if ($request->is('api/*') || $request->expectsJson()) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Too many requests. Please wait a moment and try again.',
+                ], Response::HTTP_TOO_MANY_REQUESTS);
+            }
+
+            return null;
         });
     })->create();

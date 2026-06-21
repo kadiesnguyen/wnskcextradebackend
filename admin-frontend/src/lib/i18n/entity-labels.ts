@@ -16,6 +16,10 @@ export function contractStatusLabel(t: TranslateFn, status: number): string {
   return label(t, "label.contract.status", status);
 }
 
+export function contractIsWinLabel(t: TranslateFn, isWin: number): string {
+  return label(t, "label.contract.is_win", isWin);
+}
+
 export function contractKongykLabel(t: TranslateFn, kongyk: number): string {
   return label(t, "label.contract.kongyk", kongyk);
 }

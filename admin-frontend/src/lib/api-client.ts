@@ -43,6 +43,7 @@ export async function apiClient<T>(
 ): Promise<T> {
   const { body, auth = true, headers, ...rest } = options;
   const requestHeaders = new Headers(headers);
+  requestHeaders.set("Accept", "application/json");
 
   if (body !== undefined) {
     requestHeaders.set("Content-Type", "application/json");
@@ -69,9 +70,11 @@ export async function apiClient<T>(
     const message =
       typeof payload === "object" && payload !== null && "message" in payload
         ? String((payload as { message: unknown }).message)
-        : typeof payload === "string" && payload.length > 0
-          ? payload
-          : `Request failed with status ${response.status}`;
+        : response.status === 429
+          ? "Too many requests. Please wait a moment and try again."
+          : typeof payload === "string" && payload.length > 0 && !payload.startsWith("<")
+            ? payload
+            : `Request failed with status ${response.status}`;
 
     throw new ApiError(response.status, message, payload);
   }

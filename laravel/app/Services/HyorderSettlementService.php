@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Models\Bill;
 use App\Models\Hyorder;
 use App\Models\HyResultQueue;
+use App\Models\Hysetting;
 use App\Models\User;
 use App\Models\UserCoin;
 use Illuminate\Support\Facades\DB;
@@ -89,9 +90,9 @@ class HyorderSettlementService
                 throw new \RuntimeException('Order is not pending settlement.');
             }
 
-            $profitAmount = $locked->num * $locked->hybl / 100;
+            $profitAmount = (float) $locked->num * (float) $locked->hybl / 100;
             $sellPrice = $this->fetchSellPrice((string) $locked->coinname);
-            $tmoney = $locked->ploss;
+            $winPayout = $this->resolveWinPayout($locked);
 
             $updateData = [
                 'status' => 2,
@@ -101,7 +102,7 @@ class HyorderSettlementService
             $kongyk = (int) ($locked->kongyk ?? 0);
 
             if ($kongyk === 1) {
-                $this->applyWin($locked, $profitAmount, $tmoney, $updateData);
+                $this->applyWin($locked, $profitAmount, $winPayout, $updateData);
             } elseif ($kongyk === 2) {
                 $this->applyLoss($locked, $updateData);
             } else {
@@ -109,7 +110,7 @@ class HyorderSettlementService
                 $resultMode = (int) ($user->hy_result_mode ?? 0);
 
                 if ($resultMode === 1) {
-                    $this->applyWin($locked, $profitAmount, $tmoney, $updateData);
+                    $this->applyWin($locked, $profitAmount, $winPayout, $updateData);
                 } elseif ($resultMode === 2) {
                     $this->applyLoss($locked, $updateData);
                 } else {
@@ -119,11 +120,11 @@ class HyorderSettlementService
                         ->value('result');
 
                     if ($queueResult === 'WIN') {
-                        $this->applyWin($locked, $profitAmount, $tmoney, $updateData);
+                        $this->applyWin($locked, $profitAmount, $winPayout, $updateData);
                     } elseif ($queueResult === 'LOSS') {
                         $this->applyLoss($locked, $updateData);
                     } else {
-                        $this->applyMarketResult($locked, $sellPrice, $profitAmount, $tmoney, $updateData);
+                        $this->applyMarketResult($locked, $sellPrice, $profitAmount, $winPayout, $updateData);
                     }
                 }
             }
@@ -145,12 +146,28 @@ class HyorderSettlementService
     protected function applyWin(
         Hyorder $order,
         float $profitAmount,
-        float $tmoney,
+        float $winPayout,
         array &$updateData,
     ): void {
         $updateData['is_win'] = 1;
         $updateData['ploss'] = $profitAmount;
-        $this->addUserBalance((int) $order->uid, (float) $tmoney);
+        $this->addUserBalance((int) $order->uid, $winPayout, 'Trade win bonus');
+    }
+
+    protected function resolveWinPayout(Hyorder $order): float
+    {
+        $num = (float) $order->num;
+        $rate = (float) $order->hybl;
+        $stored = (float) $order->ploss;
+
+        if ($stored > $num) {
+            return $stored;
+        }
+
+        $sxf = (float) (Hysetting::query()->value('hy_sxf') ?? 0);
+        $tmoney = $num + ($num * $sxf / 100);
+
+        return $tmoney + ($tmoney * $rate / 100);
     }
 
     /**
@@ -162,7 +179,7 @@ class HyorderSettlementService
         $lossAmount = $order->num * $order->hybl / 100;
         $refundAmount = $order->num - $lossAmount;
         $updateData['ploss'] = $lossAmount;
-        $this->addUserBalance((int) $order->uid, (float) $refundAmount);
+        $this->addUserBalance((int) $order->uid, (float) $refundAmount, 'Trade loss refund');
     }
 
     /**
@@ -172,7 +189,7 @@ class HyorderSettlementService
         Hyorder $order,
         float|string $sellPrice,
         float $profitAmount,
-        float $tmoney,
+        float $winPayout,
         array &$updateData,
     ): void {
         $sell = (float) $sellPrice;
@@ -180,13 +197,13 @@ class HyorderSettlementService
         if ($sell > 0) {
             if ((int) $order->hyzd === 1) {
                 if ($sell > (float) $order->buyprice) {
-                    $this->applyWin($order, $profitAmount, $tmoney, $updateData);
+                    $this->applyWin($order, $profitAmount, $winPayout, $updateData);
                 } else {
                     $this->applyLoss($order, $updateData);
                 }
             } elseif ((int) $order->hyzd === 2) {
                 if ($sell < (float) $order->buyprice) {
-                    $this->applyWin($order, $profitAmount, $tmoney, $updateData);
+                    $this->applyWin($order, $profitAmount, $winPayout, $updateData);
                 } else {
                     $this->applyLoss($order, $updateData);
                 }
@@ -239,7 +256,7 @@ class HyorderSettlementService
         return 0;
     }
 
-    protected function addUserBalance(int $userId, float $amount): void
+    protected function addUserBalance(int $userId, float $amount, string $remark = 'Trade win bonus'): void
     {
         if ($amount <= 0) {
             return;
@@ -267,7 +284,7 @@ class HyorderSettlementService
             'type' => 4,
             'addtime' => now()->format('Y-m-d H:i:s'),
             'st' => 1,
-            'remark' => 'Trade win bonus',
+            'remark' => $remark,
         ]);
     }
 }

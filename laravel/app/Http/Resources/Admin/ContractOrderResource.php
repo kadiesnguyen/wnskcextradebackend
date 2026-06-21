@@ -12,6 +12,10 @@ class ContractOrderResource extends JsonResource
      */
     public function toArray(Request $request): array
     {
+        /** @var array<int, array{balance_before: ?float, balance_after: ?float, profit_loss: ?float}> $balanceMap */
+        $balanceMap = $request->attributes->get('contract_order_balance_map', []);
+        $balance = $balanceMap[(int) $this->id] ?? [];
+
         return [
             'id' => $this->id,
             'uid' => (int) $this->uid,
@@ -36,6 +40,9 @@ class ContractOrderResource extends JsonResource
             'kongyk_label' => $this->kongykLabel(),
             'invit' => $this->invit,
             'tznum' => (int) $this->tznum,
+            'balance_before' => $balance['balance_before'] ?? null,
+            'balance_after' => $balance['balance_after'] ?? null,
+            'profit_loss' => $balance['profit_loss'] ?? null,
         ];
     }
 
