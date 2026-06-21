@@ -431,7 +431,7 @@ class ContractController extends Controller
                 'intselltime' => now()->addSeconds($request->ctime * 60)->timestamp,
                 'buyprice' => $close,
                 'sellprice' => 0,
-                'ploss' => $tmoney + (($tmoney * $request->uprate) / 100),
+                'ploss' => ($request->amount * $request->uprate) / 100,
                 'time' => $request->ctime,
                 'kongyk' => 0,
                 'invit' => $invit,

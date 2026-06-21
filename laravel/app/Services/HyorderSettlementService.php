@@ -5,7 +5,6 @@ namespace App\Services;
 use App\Models\Bill;
 use App\Models\Hyorder;
 use App\Models\HyResultQueue;
-use App\Models\Hysetting;
 use App\Models\User;
 use App\Models\UserCoin;
 use Illuminate\Support\Facades\DB;
@@ -90,9 +89,9 @@ class HyorderSettlementService
                 throw new \RuntimeException('Order is not pending settlement.');
             }
 
-            $profitAmount = (float) $locked->num * (float) $locked->hybl / 100;
+            $profitAmount = ContractSettlementMath::profitAmount($locked);
             $sellPrice = $this->fetchSellPrice((string) $locked->coinname);
-            $winPayout = $this->resolveWinPayout($locked);
+            $winPayout = ContractSettlementMath::winPayout($locked);
 
             $updateData = [
                 'status' => 2,
@@ -154,24 +153,8 @@ class HyorderSettlementService
         $this->addUserBalance(
             (int) $order->uid,
             $winPayout,
-            'Trade win bonus #' . $order->id,
+            ContractSettlementMath::winRemark((int) $order->id),
         );
-    }
-
-    protected function resolveWinPayout(Hyorder $order): float
-    {
-        $num = (float) $order->num;
-        $rate = (float) $order->hybl;
-        $stored = (float) $order->ploss;
-
-        if ($stored > $num) {
-            return $stored;
-        }
-
-        $sxf = (float) (Hysetting::query()->value('hy_sxf') ?? 0);
-        $tmoney = $num + ($num * $sxf / 100);
-
-        return $tmoney + ($tmoney * $rate / 100);
     }
 
     /**
@@ -179,14 +162,14 @@ class HyorderSettlementService
      */
     protected function applyLoss(Hyorder $order, array &$updateData): void
     {
+        $lossAmount = ContractSettlementMath::profitAmount($order);
+        $refundAmount = ContractSettlementMath::lossRefund($order);
         $updateData['is_win'] = 2;
-        $lossAmount = $order->num * $order->hybl / 100;
-        $refundAmount = $order->num - $lossAmount;
         $updateData['ploss'] = $lossAmount;
         $this->addUserBalance(
             (int) $order->uid,
-            (float) $refundAmount,
-            'Trade loss refund #' . $order->id,
+            $refundAmount,
+            ContractSettlementMath::lossRemark((int) $order->id),
         );
     }
 
@@ -270,21 +253,8 @@ class HyorderSettlementService
             return;
         }
 
-        $existingBill = Bill::query()
-            ->where('uid', $userId)
-            ->where('remark', $remark)
-            ->first(['id', 'afternum']);
-
-        if ($existingBill) {
-            $current = (float) UserCoin::query()->where('userid', $userId)->value('usdt');
-            $expected = (float) $existingBill->afternum;
-
-            if ($current + 0.0001 >= $expected) {
-                return;
-            }
-
-            $amount = $expected - $current;
-            $remark = $remark . ' (wallet sync)';
+        if (Bill::query()->where('uid', $userId)->where('remark', $remark)->exists()) {
+            return;
         }
 
         $userCoin = UserCoin::query()->where('userid', $userId)->lockForUpdate()->first();
@@ -313,18 +283,16 @@ class HyorderSettlementService
             throw new \RuntimeException("User not found: {$userId}.");
         }
 
-        if (!$existingBill) {
-            Bill::query()->create([
-                'uid' => $user->id,
-                'username' => $user->username,
-                'num' => $amount,
-                'coinname' => 'usdt',
-                'afternum' => $verified,
-                'type' => 4,
-                'addtime' => now()->format('Y-m-d H:i:s'),
-                'st' => 1,
-                'remark' => $remark,
-            ]);
-        }
+        Bill::query()->create([
+            'uid' => $user->id,
+            'username' => $user->username,
+            'num' => $amount,
+            'coinname' => 'usdt',
+            'afternum' => $verified,
+            'type' => 4,
+            'addtime' => now()->format('Y-m-d H:i:s'),
+            'st' => 1,
+            'remark' => $remark,
+        ]);
     }
 }
