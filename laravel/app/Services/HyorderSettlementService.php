@@ -270,6 +270,23 @@ class HyorderSettlementService
             return;
         }
 
+        $existingBill = Bill::query()
+            ->where('uid', $userId)
+            ->where('remark', $remark)
+            ->first(['id', 'afternum']);
+
+        if ($existingBill) {
+            $current = (float) UserCoin::query()->where('userid', $userId)->value('usdt');
+            $expected = (float) $existingBill->afternum;
+
+            if ($current + 0.0001 >= $expected) {
+                return;
+            }
+
+            $amount = $expected - $current;
+            $remark = $remark . ' (wallet sync)';
+        }
+
         $userCoin = UserCoin::query()->where('userid', $userId)->lockForUpdate()->first();
 
         if (!$userCoin) {
@@ -277,15 +294,16 @@ class HyorderSettlementService
         }
 
         $before = (float) $userCoin->usdt;
-        $updated = UserCoin::query()->where('userid', $userId)->increment('usdt', $amount);
+        $after = $before + $amount;
+        $userCoin->usdt = number_format($after, 10, '.', '');
 
-        if (!$updated) {
+        if (!$userCoin->save()) {
             throw new \RuntimeException("Failed to credit user {$userId} wallet.");
         }
 
-        $after = (float) UserCoin::query()->where('userid', $userId)->value('usdt');
+        $verified = (float) UserCoin::query()->where('userid', $userId)->value('usdt');
 
-        if ($after + 0.0001 < $before + $amount) {
+        if ($verified + 0.0001 < $after) {
             throw new \RuntimeException("Wallet credit verification failed for user {$userId}.");
         }
 
@@ -295,16 +313,18 @@ class HyorderSettlementService
             throw new \RuntimeException("User not found: {$userId}.");
         }
 
-        Bill::query()->create([
-            'uid' => $user->id,
-            'username' => $user->username,
-            'num' => $amount,
-            'coinname' => 'usdt',
-            'afternum' => $after,
-            'type' => 4,
-            'addtime' => now()->format('Y-m-d H:i:s'),
-            'st' => 1,
-            'remark' => $remark,
-        ]);
+        if (!$existingBill) {
+            Bill::query()->create([
+                'uid' => $user->id,
+                'username' => $user->username,
+                'num' => $amount,
+                'coinname' => 'usdt',
+                'afternum' => $verified,
+                'type' => 4,
+                'addtime' => now()->format('Y-m-d H:i:s'),
+                'st' => 1,
+                'remark' => $remark,
+            ]);
+        }
     }
 }
