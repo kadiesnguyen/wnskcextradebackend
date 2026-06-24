@@ -10,6 +10,7 @@ use App\Models\Hysetting;
 use App\Models\User;
 use App\Models\UserCoin;
 use App\Services\HyorderSettlementService;
+use App\Support\TradingSymbol;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Http;
@@ -136,7 +137,7 @@ class ContractController extends Controller
     }
     public function getPrice(Request $request)
     {
-        $symbol = strtoupper(trim($request->get('symbol')));
+        $symbol = TradingSymbol::normalize((string) $request->get('symbol'));
 
         if (empty($symbol)) {
             return response()->json([
@@ -243,7 +244,7 @@ class ContractController extends Controller
     }
     private function fetchPrice(string $symbol)
     {
-        $normalized = strtoupper($symbol);
+        $normalized = TradingSymbol::normalize($symbol);
 
         // ==================== BINANCE (Crypto) ====================
         if (str_ends_with($normalized, 'USDT')) {
@@ -374,7 +375,7 @@ class ContractController extends Controller
 
             // $coinArr = explode('/', $request->coinname);
             // $symbol = strtolower($coinArr[0] . $coinArr[1]);
-            $symbol = strtoupper($request->coinname);
+            $symbol = TradingSymbol::normalize((string) $request->coinname);
 
             // Get market price from Huobi API
             // $coinApi = "https://www.okx.com/api/v5/market/history-index-candles?instId=" . $symbol;

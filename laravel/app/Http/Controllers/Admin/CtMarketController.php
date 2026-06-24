@@ -8,6 +8,7 @@ use App\Http\Requests\Admin\UpdateCtMarketStatusRequest;
 use App\Http\Requests\Admin\UpsertCtMarketRequest;
 use App\Http\Resources\Admin\CtMarketResource;
 use App\Models\Ctmarket;
+use App\Support\TradingSymbol;
 use Illuminate\Http\JsonResponse;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -163,11 +164,12 @@ class CtMarketController extends Controller
     private function marketPayload(UpsertCtMarketRequest $request): array
     {
         $coinname = strtolower(trim((string) $request->input('coinname')));
+        $symbol = TradingSymbol::normalize($coinname . 'usdt');
 
         return [
             'coinname' => $coinname,
-            'name' => $coinname . '_usdt',
-            'symbol' => $coinname . '-usdt',
+            'name' => strtolower($symbol),
+            'symbol' => $symbol,
             'title' => strtoupper($coinname) . '/USDT',
             'status' => (int) $request->input('status'),
             'state' => (int) $request->input('state'),

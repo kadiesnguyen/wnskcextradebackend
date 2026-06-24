@@ -10,6 +10,7 @@ use App\Models\UserCoin;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
+use App\Support\TradingSymbol;
 
 class HyorderSettlementService
 {
@@ -206,7 +207,7 @@ class HyorderSettlementService
 
     protected function fetchSellPrice(string $coinname): float|string
     {
-        $normalized = strtoupper($coinname);
+        $normalized = TradingSymbol::normalize($coinname);
 
         try {
             if (str_ends_with($normalized, 'USDT')) {

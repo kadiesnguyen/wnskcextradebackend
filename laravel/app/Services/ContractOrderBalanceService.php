@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Models\Bill;
 use App\Models\Hyorder;
+use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 
 class ContractOrderBalanceService
@@ -21,10 +22,19 @@ class ContractOrderBalanceService
         $balances = [];
 
         foreach ($orders as $order) {
+            // The buy bill is created a fraction of a second after the order row,
+            // so its addtime can be 1-2s past order.buytime. Match within a small
+            // window and on the staked amount instead of an exact timestamp.
+            $buyTime = Carbon::parse($order->buytime);
+
             $buyBill = Bill::query()
                 ->where('uid', $order->uid)
                 ->where('type', 3)
-                ->where('addtime', $order->buytime)
+                ->where('num', $order->num)
+                ->whereBetween('addtime', [
+                    $buyTime->copy()->subSeconds(2)->format('Y-m-d H:i:s'),
+                    $buyTime->copy()->addSeconds(10)->format('Y-m-d H:i:s'),
+                ])
                 ->orderBy('id')
                 ->first(['id', 'num', 'afternum']);
 

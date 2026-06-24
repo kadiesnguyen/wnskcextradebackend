@@ -2029,7 +2029,7 @@ CREATE TABLE `tw_ctmarket` (
 --
 
 INSERT INTO `tw_ctmarket` (`id`, `coinname`, `name`, `symbol`, `title`, `status`, `state`, `sort`, `addtime`, `logo`) VALUES
-(1, 'btc', 'btcusdt', 'btc-usdt', 'BTC/USDT', 1, 1, 1, '2025-06-20 12:20:29', NULL),
+(1, 'btc', 'btcusdt', 'BTCUSDT', 'BTC/USDT', 1, 1, 1, '2025-06-20 12:20:29', NULL),
 (2, 'eth', 'ethusdt', 'eth-usdt', 'ETH/USDT', 1, 1, 2, '2025-06-18 21:40:07', NULL),
 (3, 'bch', 'bchusdt', 'bch-usdt', 'BCH/USDT', 1, 1, 3, '2025-06-21 10:48:55', NULL),
 (4, 'ltc', 'ltcusdt', 'ltc-usdt', 'LTC/USDT', 1, 1, 4, '2025-06-21 10:48:47', NULL),
