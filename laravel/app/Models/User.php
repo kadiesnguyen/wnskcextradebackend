@@ -159,4 +159,69 @@ class User extends Model implements AuthenticatableContract, JWTSubject
             $this->attributes['paypassword'] = md5($paypassword);
         }
     }
+
+    public function verifyPassword(string $plain): bool
+    {
+        $stored = (string) $this->password;
+        $single = md5($plain);
+
+        if (hash_equals($stored, $single)) {
+            return true;
+        }
+
+        // Legacy: admin panel hashed twice (controller md5 + model mutator md5).
+        return hash_equals($stored, md5($single));
+    }
+
+    public function verifyPaypassword(string $plain): bool
+    {
+        $stored = (string) $this->paypassword;
+        $single = md5($plain);
+
+        if (hash_equals($stored, $single)) {
+            return true;
+        }
+
+        return hash_equals($stored, md5($single));
+    }
+
+    public function syncPasswordFromPlain(string $plain): void
+    {
+        $hash = md5($plain);
+
+        static::query()->whereKey($this->getKey())->update(['password' => $hash]);
+        $this->attributes['password'] = $hash;
+    }
+
+    public function syncPaypasswordFromPlain(string $plain): void
+    {
+        $hash = md5($plain);
+
+        static::query()->whereKey($this->getKey())->update(['paypassword' => $hash]);
+        $this->attributes['paypassword'] = $hash;
+    }
+
+    public function repairPasswordIfLegacy(string $plain): void
+    {
+        if (!$this->verifyPassword($plain)) {
+            return;
+        }
+
+        $singleHash = md5($plain);
+        if (!hash_equals((string) $this->password, $singleHash)) {
+            $this->syncPasswordFromPlain($plain);
+        }
+    }
+
+    public function repairPaypasswordIfLegacy(string $plain): void
+    {
+        if (!$this->verifyPaypassword($plain)) {
+            return;
+        }
+
+        $singleHash = md5($plain);
+        if (!hash_equals((string) $this->paypassword, $singleHash)) {
+            $this->syncPaypasswordFromPlain($plain);
+        }
+    }
 }

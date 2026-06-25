@@ -114,8 +114,8 @@ class UserController extends Controller
 
         $payload = [
             'username' => $username,
-            'password' => md5((string) $request->input('password')),
-            'paypassword' => $request->filled('paypassword') ? md5((string) $request->input('paypassword')) : null,
+            'password' => (string) $request->input('password'),
+            'paypassword' => $request->filled('paypassword') ? (string) $request->input('paypassword') : null,
             'fullname' => $request->input('fullname'),
             'phonenumber' => $request->input('phonenumber'),
             'bank_name' => $request->input('bank_name'),
@@ -123,7 +123,8 @@ class UserController extends Controller
             'bank_acc_name' => $request->input('bank_acc_name'),
             'wallet' => $request->input('wallet'),
             'status' => (int) $request->input('status', 2),
-            'txstate' => (int) $request->input('txstate', 1),
+            'txstate' => $request->filled('paypassword') ? 1 : (int) $request->input('txstate', 1),
+            'wdstatus' => $request->filled('paypassword') ? 1 : 0,
             'invit_1' => $invitUser?->id ?? 0,
             'invit_2' => $invitUser?->invit_1 ?? 0,
             'invit_3' => $invitUser?->invit_2 ?? 0,
@@ -183,11 +184,13 @@ class UserController extends Controller
         ]);
 
         if ($request->filled('password')) {
-            $payload['password'] = md5((string) $request->input('password'));
+            $payload['password'] = (string) $request->input('password');
         }
 
         if ($request->filled('paypassword')) {
-            $payload['paypassword'] = md5((string) $request->input('paypassword'));
+            $payload['paypassword'] = (string) $request->input('paypassword');
+            $payload['txstate'] = 1;
+            $payload['wdstatus'] = 1;
         }
 
         if (isset($payload['status']) && (int) $payload['status'] === 1 && $user->username) {

@@ -415,12 +415,14 @@ class FinanceController extends Controller
             }
 
             // Verify paypassword
-            if (md5($request->paypassword) !== $user->paypassword) {
+            if (!$user->verifyPaypassword($request->paypassword)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Sai mật khẩu thanh toán',
                 ], 422);
             }
+
+            $user->repairPaypasswordIfLegacy($request->paypassword);
 
             // Get coin info
             $coin = Coin::findOrFail($request->cid);

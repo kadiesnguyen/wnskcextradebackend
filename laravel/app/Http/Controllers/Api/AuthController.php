@@ -247,12 +247,15 @@ class AuthController extends Controller
             $user = User::where('username', $request->email)->first();
 
             // Check if user exists and password matches
-            if (!$user || $user->password !== md5($request->password)) {
+            if (!$user || !$user->verifyPassword($request->password)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Không tìm thấy tài khoản hoặc mật khẩu không đúng',
                 ], 401);
             }
+
+            // Repair legacy double-hashed passwords from admin panel edits.
+            $user->repairPasswordIfLegacy($request->password);
 
             // Generate JWT token
             $token = JWTAuth::fromUser($user);
@@ -415,7 +418,7 @@ class AuthController extends Controller
             $user = JWTAuth::user();
 
             // Check old password
-            if (md5($request->old_password) !== $user->password) {
+            if (!$user->verifyPassword($request->old_password)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Mật khẩu cũ không đúng',
@@ -480,11 +483,15 @@ class AuthController extends Controller
             }
 
             // Verify current paypassword if wdstatus = 1
-            if ($user->wdstatus == 1 && md5($request->current_paypassword) !== $user->paypassword) {
+            if ($user->wdstatus == 1 && !$user->verifyPaypassword($request->current_paypassword)) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Mật khẩu thanh toán không đúng',
                 ], 422);
+            }
+
+            if ($user->wdstatus == 1) {
+                $user->repairPaypasswordIfLegacy($request->current_paypassword);
             }
 
             // Update paypassword and wdstatus
