@@ -38,6 +38,11 @@ function Field({
   );
 }
 
+/** ponytail: on edit send "" so API clears DB columns; on create omit empty keys */
+function payloadStr(mode: "create" | "edit", value: string): string | undefined {
+  return mode === "edit" ? value : value || undefined;
+}
+
 function userToForm(user: AdminUser) {
   return {
     username: user.username ?? "",
@@ -95,17 +100,17 @@ export function UserFormDialog({
     e.preventDefault();
     const payload: UserUpsertPayload = {
       username: form.username,
-      fullname: form.fullname || undefined,
-      phonenumber: form.phonenumber || undefined,
-      cccd: form.cccd || undefined,
+      fullname: payloadStr(mode, form.fullname),
+      phonenumber: payloadStr(mode, form.phonenumber),
+      cccd: payloadStr(mode, form.cccd),
       status: form.status,
       txstate: form.txstate,
       hy_result_mode: form.hy_result_mode,
       kefu: form.kefu !== "" ? Number(form.kefu) : undefined,
-      bank_name: form.bank_name || undefined,
-      bank_acc_no: form.bank_acc_no || undefined,
-      bank_acc_name: form.bank_acc_name || undefined,
-      wallet: form.wallet || undefined,
+      bank_name: payloadStr(mode, form.bank_name),
+      bank_acc_no: payloadStr(mode, form.bank_acc_no),
+      bank_acc_name: payloadStr(mode, form.bank_acc_name),
+      wallet: payloadStr(mode, form.wallet),
       invit_1: form.invit_1 !== "" ? Number(form.invit_1) : undefined,
       invit_2: form.invit_2 !== "" ? Number(form.invit_2) : undefined,
       invit_3: form.invit_3 !== "" ? Number(form.invit_3) : undefined,
@@ -214,7 +219,7 @@ export function UserFormDialog({
           <Field label={t("userForm.phone")}>
             <input value={form.phonenumber} onChange={(e) => set("phonenumber", e.target.value)} className={inputClass} />
           </Field>
-          {mode === "edit" && detailQuery.data?.rzstatus === 2 ? (
+          {mode === "edit" ? (
             <Field label={t("userForm.cccd")}>
               <input value={form.cccd} onChange={(e) => set("cccd", e.target.value)} className={inputClass} />
             </Field>
