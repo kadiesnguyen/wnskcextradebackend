@@ -302,6 +302,13 @@ class ContractController extends Controller
             // Get authenticated user
             $user = JWTAuth::user();
 
+            if ((int) ($user->trade_locked ?? 0) === 1) {
+                return response()->json([
+                    'status' => false,
+                    'message' => $user->tradeLockMessage(),
+                ], 422);
+            }
+
             // Check rzstatus
             // if ($user->rzstatus != 2) {
             //     return response()->json([

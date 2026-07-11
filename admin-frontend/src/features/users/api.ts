@@ -53,6 +53,13 @@ export function updateUsersStatus(ids: number[], type: UserStatusType): Promise<
   return apiClient<MutationResponse>("/users/status", { method: "PUT", body: { ids, type } });
 }
 
+export function updateUserTradeLock(
+  id: number,
+  payload: { locked: boolean; message?: string },
+): Promise<MutationResponse> {
+  return apiClient<MutationResponse>(`/users/${id}/trade-lock`, { method: "PUT", body: payload });
+}
+
 export function addUserFunds(id: number, amount: string): Promise<MutationResponse> {
   return apiClient<MutationResponse>(`/users/${id}/add-funds`, { method: "POST", body: { amount } });
 }

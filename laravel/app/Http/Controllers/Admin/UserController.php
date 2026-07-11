@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\AddUserFundsRequest;
 use App\Http\Requests\Admin\BulkUpdateUserStatusRequest;
 use App\Http\Requests\Admin\KycReviewRequest;
 use App\Http\Requests\Admin\ListUsersRequest;
+use App\Http\Requests\Admin\UpdateUserTradeLockRequest;
 use App\Http\Requests\Admin\UpdateUserAssetRequest;
 use App\Http\Requests\Admin\UpdateUserLoginLogStatusRequest;
 use App\Http\Requests\Admin\UpdateUserStatusRequest;
@@ -216,6 +217,43 @@ class UserController extends Controller
     public function updateStatus(UpdateUserStatusRequest $request, int $id): JsonResponse
     {
         return $this->applyUserStatusMutation([(int) $id], (int) $request->input('type'));
+    }
+
+    public function updateTradeLock(UpdateUserTradeLockRequest $request, int $id): JsonResponse
+    {
+        $user = User::query()->find($id);
+
+        if (!$user) {
+            return response()->json([
+                'status' => false,
+                'message' => 'User not found.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        $locked = $request->boolean('locked');
+        $message = trim((string) $request->input('message', ''));
+
+        $payload = [
+            'trade_locked' => $locked ? 1 : 0,
+            'trade_lock_msg' => $locked
+                ? ($message !== '' ? $message : User::DEFAULT_TRADE_LOCK_MESSAGE)
+                : null,
+        ];
+
+        if (!$user->update($payload)) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Edit unsuccessful.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
+        }
+
+        $this->enrichUsers(collect([$user->fresh()]));
+
+        return response()->json([
+            'status' => true,
+            'message' => $locked ? 'Trade locked.' : 'Trade unlocked.',
+            'data' => new UserResource($user->fresh()),
+        ]);
     }
 
     public function bulkUpdateStatus(BulkUpdateUserStatusRequest $request): JsonResponse

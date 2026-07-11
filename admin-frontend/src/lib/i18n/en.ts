@@ -100,6 +100,8 @@ const en: Dictionary = {
   "action.addUsdt": "+USDT",
   "action.setAgent": "Set agent",
   "action.cancelAgent": "Cancel agent",
+  "action.lockTrade": "Lock trading",
+  "action.unlockTrade": "Unlock trading",
   "action.enable": "Enable",
   "action.disable": "Disable",
   "action.approve": "Approve",
@@ -242,6 +244,9 @@ const en: Dictionary = {
   "page.users.addFundsSuccess": "Successfully added {amount} USDT to {username}.",
   "page.users.bulkActionSuccess": "{action} completed for {count} member(s).",
   "page.users.bulkActionFailed": "{action} failed. Please try again.",
+  "page.users.tradeLockHint": "Message shown to the user when placing an order. Edit before locking.",
+  "page.users.tradeLockSuccess": "Trading locked for {username}.",
+  "page.users.tradeUnlockSuccess": "Trading unlocked for {username}.",
 
   "page.agents.title": "Agents",
   "page.agents.description": "Manage agent accounts and referral stats.",

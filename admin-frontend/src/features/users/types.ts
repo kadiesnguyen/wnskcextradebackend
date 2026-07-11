@@ -26,6 +26,8 @@ export type AdminUser = {
   cardfm?: string | null;
   rztime?: number;
   rzuptime?: number;
+  trade_locked?: number;
+  trade_lock_msg?: string | null;
   usdt?: string;
   btc?: string;
   eth?: string;

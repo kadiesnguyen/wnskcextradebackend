@@ -100,6 +100,8 @@ const vi: Dictionary = {
   "action.addUsdt": "+USDT",
   "action.setAgent": "Đặt đại lý",
   "action.cancelAgent": "Hủy đại lý",
+  "action.lockTrade": "Khóa giao dịch",
+  "action.unlockTrade": "Mở khóa giao dịch",
   "action.enable": "Kích hoạt",
   "action.disable": "Tạm ngừng",
   "action.approve": "Duyệt",
@@ -242,6 +244,9 @@ const vi: Dictionary = {
   "page.users.addFundsSuccess": "Đã cộng {amount} USDT cho {username} thành công.",
   "page.users.bulkActionSuccess": "{action} thành công cho {count} thành viên.",
   "page.users.bulkActionFailed": "{action} thất bại. Vui lòng thử lại.",
+  "page.users.tradeLockHint": "Thông báo hiển thị cho user khi đặt lệnh. Có thể chỉnh nội dung trước khi khóa.",
+  "page.users.tradeLockSuccess": "Đã khóa giao dịch cho {username}.",
+  "page.users.tradeUnlockSuccess": "Đã mở khóa giao dịch cho {username}.",
 
   "page.agents.title": "Đại lý",
   "page.agents.description": "Quản lý tài khoản đại lý và thống kê giới thiệu.",

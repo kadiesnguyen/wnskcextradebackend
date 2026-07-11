@@ -45,6 +45,8 @@ class UserResource extends JsonResource
             'status' => (int) $this->status,
             'wdstatus' => $this->wdstatus !== null ? (int) $this->wdstatus : null,
             'txstate' => (int) $this->txstate,
+            'trade_locked' => (int) ($this->trade_locked ?? 0),
+            'trade_lock_msg' => $this->trade_lock_msg,
             'stoptime' => (int) $this->stoptime,
             'is_agent' => (int) $this->is_agent,
             'is_manager' => $this->when(isset($this->is_manager), (bool) $this->is_manager),

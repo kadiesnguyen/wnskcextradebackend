@@ -48,6 +48,7 @@ Route::middleware(['auth:admin', 'check.admin.status'])->group(function () {
     Route::put('users/{id}', [UserController::class, 'update'])->whereNumber('id');
     Route::put('users/status', [UserController::class, 'bulkUpdateStatus']);
     Route::put('users/{id}/status', [UserController::class, 'updateStatus'])->whereNumber('id');
+    Route::put('users/{id}/trade-lock', [UserController::class, 'updateTradeLock'])->whereNumber('id');
     Route::post('users/{id}/add-funds', [UserController::class, 'addFunds'])->whereNumber('id');
     Route::post('users/{id}/kyc-review', [UserController::class, 'kycReview'])->whereNumber('id');
     Route::get('users/{id}/kyc-form', [UserController::class, 'kycForm'])->whereNumber('id');

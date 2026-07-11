@@ -10,6 +10,7 @@ import {
   setUserAgent,
   updateUser,
   updateUsersStatus,
+  updateUserTradeLock,
 } from "./api";
 import type { UserStatusType, UserUpsertPayload } from "./api";
 
@@ -46,6 +47,19 @@ export function useUserActions() {
     onSuccess: invalidate,
   });
 
+  const updateTradeLock = useMutation({
+    mutationFn: ({
+      id,
+      locked,
+      message,
+    }: {
+      id: number;
+      locked: boolean;
+      message?: string;
+    }) => updateUserTradeLock(id, { locked, message }),
+    onSuccess: invalidate,
+  });
+
   const addFunds = useMutation({
     mutationFn: ({ id, amount }: { id: number; amount: string }) => addUserFunds(id, amount),
     onSuccess: () => {
@@ -76,5 +90,5 @@ export function useUserActions() {
     onSuccess: invalidate,
   });
 
-  return { create, update, updateStatus, addFunds, kycReview, setAgent, cancelAgent };
+  return { create, update, updateStatus, updateTradeLock, addFunds, kycReview, setAgent, cancelAgent };
 }

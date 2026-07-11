@@ -13,6 +13,8 @@ class User extends Model implements AuthenticatableContract, JWTSubject
 {
     use Authenticatable, HasFactory;
 
+    public const DEFAULT_TRADE_LOCK_MESSAGE = 'Tài khoản đang bị khóa giao dịch';
+
     /**
      * The table associated with the model.
      *
@@ -69,6 +71,8 @@ class User extends Model implements AuthenticatableContract, JWTSubject
         'status',
         'wdstatus',
         'txstate',
+        'trade_locked',
+        'trade_lock_msg',
         'invit',
         'stoptime',
         'is_agent',
@@ -113,6 +117,7 @@ class User extends Model implements AuthenticatableContract, JWTSubject
         'logins' => 'integer',
         'status' => 'integer',
         'txstate' => 'integer',
+        'trade_locked' => 'integer',
         'is_agent' => 'integer',
         'kefu' => 'integer',
         'lgtime' => 'datetime',
@@ -183,6 +188,13 @@ class User extends Model implements AuthenticatableContract, JWTSubject
         }
 
         return hash_equals($stored, md5($single));
+    }
+
+    public function tradeLockMessage(): string
+    {
+        $message = trim((string) ($this->trade_lock_msg ?? ''));
+
+        return $message !== '' ? $message : self::DEFAULT_TRADE_LOCK_MESSAGE;
     }
 
     public function syncPasswordFromPlain(string $plain): void

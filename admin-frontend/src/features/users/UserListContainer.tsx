@@ -20,12 +20,13 @@ import { UserListSkeleton } from "./UserListSkeleton";
 import { useUserActions } from "./useUserActions";
 import { useUsers } from "./useUsers";
 import { UserFormDialog } from "./UserFormDialog";
+import { TradeLockDialog, DEFAULT_TRADE_LOCK_MESSAGE } from "./TradeLockDialog";
 import { KycReviewDialog } from "./KycReviewDialog";
 import { KycViewDialog } from "./KycViewDialog";
 import type { UserUpsertPayload } from "./api";
 import type { AdminUser } from "./types";
 
-type DialogMode = "create" | "edit" | "funds" | "notice" | null;
+type DialogMode = "create" | "edit" | "funds" | "notice" | "tradeLock" | null;
 type PendingBulk = { type: 1 | 2 | 3 | 4 | 5; label: string } | null;
 
 export function UserListContainer() {
@@ -53,6 +54,7 @@ export function UserListContainer() {
   const [fundAmount, setFundAmount] = useState("");
   const [noticeTitle, setNoticeTitle] = useState("");
   const [noticeContent, setNoticeContent] = useState("");
+  const [tradeLockMessage, setTradeLockMessage] = useState(DEFAULT_TRADE_LOCK_MESSAGE);
 
   const queryParams = useMemo(
     () => ({ page: page > 0 ? page : 1, per_page: 15, username: username || undefined, status }),
@@ -60,7 +62,7 @@ export function UserListContainer() {
   );
 
   const { data, isLoading, isError, error, refetch, isFetching } = useUsers(queryParams);
-  const { create, update, updateStatus, addFunds, kycReview, setAgent, cancelAgent } = useUserActions();
+  const { create, update, updateStatus, updateTradeLock, addFunds, kycReview, setAgent, cancelAgent } = useUserActions();
 
   const users = data?.data ?? [];
   const meta = data?.meta;
@@ -240,6 +242,39 @@ export function UserListContainer() {
                       ) : null}
                       <ActionButton disabled={busy} onClick={() => { setActiveUser(user); setNoticeTitle(""); setNoticeContent(""); setDialogMode("notice"); }}>{t("action.sendNotice")}</ActionButton>
                       <ActionButton variant="primary" disabled={busy} onClick={() => { setActiveUser(user); setFundAmount(""); setDialogMode("funds"); }}>{t("action.addUsdt")}</ActionButton>
+                      {user.trade_locked === 1 ? (
+                        <ActionButton
+                          variant="success"
+                          disabled={busy}
+                          onClick={async () => {
+                            setPendingActionId(user.id);
+                            setActionError(null);
+                            try {
+                              await updateTradeLock.mutateAsync({ id: user.id, locked: false });
+                              setActionSuccess(t("page.users.tradeUnlockSuccess", { username: user.username }));
+                            } catch (err) {
+                              setActionError(err instanceof Error ? err.message : t("common.actionFailed"));
+                            } finally {
+                              setPendingActionId(null);
+                            }
+                          }}
+                        >
+                          {t("action.unlockTrade")}
+                        </ActionButton>
+                      ) : (
+                        <ActionButton
+                          variant="warning"
+                          disabled={busy}
+                          onClick={() => {
+                            setActiveUser(user);
+                            setTradeLockMessage(DEFAULT_TRADE_LOCK_MESSAGE);
+                            setFormError(null);
+                            setDialogMode("tradeLock");
+                          }}
+                        >
+                          {t("action.lockTrade")}
+                        </ActionButton>
+                      )}
                       {user.is_agent === 1 ? (
                         <ActionButton variant="danger" disabled={busy} onClick={async () => { setPendingActionId(user.id); try { await cancelAgent.mutateAsync(user.id); } catch (err) { setActionError(err instanceof Error ? err.message : t("common.actionFailed")); } finally { setPendingActionId(null); } }}>{t("action.cancelAgent")}</ActionButton>
                       ) : (
@@ -310,6 +345,32 @@ export function UserListContainer() {
             <div className="flex justify-end gap-2"><ActionButton variant="ghost" type="button" onClick={() => setDialogMode(null)}>{t("common.cancel")}</ActionButton><ActionButton variant="primary" type="submit">{t("common.confirm")}</ActionButton></div>
           </form>
         </div>
+      ) : null}
+
+      {dialogMode === "tradeLock" && activeUser ? (
+        <TradeLockDialog
+          username={activeUser.username}
+          message={tradeLockMessage}
+          onMessageChange={setTradeLockMessage}
+          onClose={() => setDialogMode(null)}
+          isPending={updateTradeLock.isPending}
+          error={formError}
+          onConfirm={async () => {
+            setFormError(null);
+            try {
+              await updateTradeLock.mutateAsync({
+                id: activeUser.id,
+                locked: true,
+                message: tradeLockMessage.trim() || DEFAULT_TRADE_LOCK_MESSAGE,
+              });
+              setDialogMode(null);
+              setActionSuccess(t("page.users.tradeLockSuccess", { username: activeUser.username }));
+            } catch (err) {
+              setFormError(err instanceof Error ? err.message : t("common.actionFailed"));
+              throw err;
+            }
+          }}
+        />
       ) : null}
 
       <ConfirmDialog isOpen={pendingBulk !== null} title={pendingBulk?.label ?? ""} message={pendingBulk ? t("page.users.bulkConfirm", { action: pendingBulk.label, count: String(selection.selectedIds.length) }) : ""} confirmLabel={t("common.confirm")} variant={pendingBulk?.type === 5 ? "danger" : "default"} isPending={updateStatus.isPending} onConfirm={handleBulk} onCancel={() => { if (!updateStatus.isPending) setPendingBulk(null); }} />
