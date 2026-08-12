@@ -31,6 +31,11 @@ export type AdminUser = {
   usdt?: string;
   btc?: string;
   eth?: string;
+  balance?: string;
+  frozen?: string;
+  total_deposit?: string;
+  total_withdraw?: string;
+  profit?: string;
 };
 
 export type KycMinerOption = {

@@ -21,6 +21,7 @@ import {
   hyzdDirectionClass,
   kongykStatusClass,
 } from "../lib/format";
+import { OrderCountdown } from "./OrderCountdown";
 import type { ContractOrder } from "./types";
 
 type ContractOrderListProps = {
@@ -107,14 +108,15 @@ export function ContractOrderList({
     <TableShell className={embedded ? "rounded-none border-0" : undefined}>
       <table className={tableClassName}>
         <colgroup>
-          <col className="w-[21%]" />
-          <col className="w-[7%]" />
+          <col className="w-[18%]" />
           <col className="w-[6%]" />
-          <col className="w-[9%]" />
-          <col className="w-[9%]" />
-          <col className="w-[14%]" />
-          <col className="w-[14%]" />
-          <col className="w-[20%]" />
+          <col className="w-[6%]" />
+          <col className="w-[8%]" />
+          <col className="w-[8%]" />
+          <col className="w-[10%]" />
+          <col className="w-[10%]" />
+          <col className="w-[12%]" />
+          <col className="w-[22%]" />
         </colgroup>
         <thead className={theadClassName}>
           <tr>
@@ -135,6 +137,9 @@ export function ContractOrderList({
             </th>
             <th scope="col" className={thClassName}>
               {t("common.status")}
+            </th>
+            <th scope="col" className={thClassName}>
+              {t("common.countdown")}
             </th>
             <th scope="col" className={thClassName}>
               {t("common.buyTime")}
@@ -182,6 +187,9 @@ export function ContractOrderList({
                 </AnnotatedCell>
                 <AnnotatedCell label={t("common.status")} className="text-muted">
                   <span className="whitespace-nowrap">{statusLabel}</span>
+                </AnnotatedCell>
+                <AnnotatedCell label={t("common.countdown")}>
+                  <OrderCountdown order={order} />
                 </AnnotatedCell>
                 <AnnotatedCell
                   label={t("common.buyTime")}

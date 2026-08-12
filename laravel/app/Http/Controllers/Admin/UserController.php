@@ -20,6 +20,7 @@ use App\Http\Resources\Admin\UserResource;
 use App\Http\Resources\Admin\UserWalletResource;
 use App\Models\Admin;
 use App\Models\Bill;
+use App\Models\Hyorder;
 use App\Models\Kjorder;
 use App\Models\Kuangji;
 use App\Models\Notice;
@@ -1080,6 +1081,31 @@ class UserController extends Controller
             ->get()
             ->keyBy('userid');
 
+        $totalDeposits = Bill::query()
+            ->whereIn('uid', $userIds)
+            ->where('type', 17)
+            ->where('remark', 'Admin cộng USDT thủ công')
+            ->selectRaw('uid, COALESCE(SUM(num), 0) as total')
+            ->groupBy('uid')
+            ->pluck('total', 'uid');
+
+        // Type 2 = money left wallet on withdraw request (amount + fee).
+        $totalWithdrawals = Bill::query()
+            ->whereIn('uid', $userIds)
+            ->where('type', 2)
+            ->selectRaw('uid, COALESCE(SUM(num), 0) as total')
+            ->groupBy('uid')
+            ->pluck('total', 'uid');
+
+        $tradingProfits = Hyorder::query()
+            ->whereIn('uid', $userIds)
+            ->where('status', 2)
+            ->selectRaw(
+                'uid, COALESCE(SUM(CASE WHEN is_win = 1 THEN ploss WHEN is_win = 2 THEN -ploss ELSE 0 END), 0) as total'
+            )
+            ->groupBy('uid')
+            ->pluck('total', 'uid');
+
         foreach ($users as $user) {
             $user->invit_1_username = $this->resolveInvitUsername($user->invit_1, $invitUsernames);
             $user->invit_2_username = $this->resolveInvitUsername($user->invit_2, $invitUsernames);
@@ -1089,6 +1115,12 @@ class UserController extends Controller
                 ? (int) $loginStates[$user->id]->status
                 : null;
             $user->user_coin = $userCoins->get($user->id);
+            $user->total_deposit = (string) ($totalDeposits[$user->id] ?? $totalDeposits[(string) $user->id] ?? 0);
+            $user->total_withdraw = (string) ($totalWithdrawals[$user->id] ?? $totalWithdrawals[(string) $user->id] ?? 0);
+            $user->profit = (string) round(
+                (float) ($tradingProfits[$user->id] ?? $tradingProfits[(string) $user->id] ?? 0),
+                2,
+            );
         }
     }
 

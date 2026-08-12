@@ -114,10 +114,17 @@ class HyorderSettlementService
                 } elseif ($resultMode === 2) {
                     $this->applyLoss($locked, $updateData);
                 } else {
-                    $queueResult = HyResultQueue::query()
+                    $queueEntry = HyResultQueue::query()
                         ->orderBy('round_no')
                         ->orderBy('id')
-                        ->value('result');
+                        ->first();
+
+                    $queueResult = $queueEntry?->result;
+
+                    // One queue slot = one order (Luôn thắng/thua không dính lệnh sau).
+                    if ($queueEntry) {
+                        $queueEntry->delete();
+                    }
 
                     if ($queueResult === 'WIN') {
                         $this->applyWin($locked, $profitAmount, $winPayout, $updateData);
@@ -135,6 +142,7 @@ class HyorderSettlementService
                 'id' => $locked->id,
                 'sellprice' => $sellPrice,
                 'is_win' => $updateData['is_win'] ?? null,
+                'kongyk' => (int) ($locked->kongyk ?? 0),
                 'ploss' => $updateData['ploss'] ?? $locked->ploss,
             ]);
         });
@@ -203,6 +211,166 @@ class HyorderSettlementService
         } else {
             $this->applyLoss($order, $updateData);
         }
+    }
+
+    /**
+     * Force a settled order to match admin win/loss control (with wallet adjust).
+     */
+    public function forceResult(Hyorder $order, int $kongyk): void
+    {
+        if (!in_array($kongyk, [1, 2], true)) {
+            throw new \RuntimeException('Invalid control value.');
+        }
+
+        $order->refresh();
+
+        if ((int) $order->status !== 2) {
+            throw new \RuntimeException('Order is not settled.');
+        }
+
+        if ($kongyk === 1) {
+            if ((int) $order->is_win === 2) {
+                $this->convertLossToWin($order);
+            } else {
+                $order->update(['kongyk' => 1]);
+            }
+
+            return;
+        }
+
+        if ((int) $order->is_win === 1) {
+            $this->convertWinToLoss($order);
+        } else {
+            $order->update(['kongyk' => 2]);
+        }
+    }
+
+    /**
+     * Flip a settled win into a loss: debit (winPayout - lossRefund) so net matches a loss.
+     */
+    public function convertWinToLoss(Hyorder $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $locked = Hyorder::query()->whereKey($order->id)->lockForUpdate()->first();
+
+            if (!$locked) {
+                throw new \RuntimeException('Order not found.');
+            }
+
+            if ((int) $locked->status !== 2) {
+                throw new \RuntimeException('Order is not settled.');
+            }
+
+            if ((int) $locked->is_win !== 1) {
+                throw new \RuntimeException('Order is not a win.');
+            }
+
+            $adjustRemark = ContractSettlementMath::winToLossRemark((int) $locked->id);
+
+            if (Bill::query()->where('uid', $locked->uid)->where('remark', $adjustRemark)->exists()) {
+                throw new \RuntimeException('Order already converted to loss.');
+            }
+
+            $lossRefund = ContractSettlementMath::lossRefund($locked);
+            $profitAmount = ContractSettlementMath::profitAmount($locked);
+            $winRemark = ContractSettlementMath::winRemark((int) $locked->id);
+
+            $winBill = Bill::query()
+                ->where('uid', $locked->uid)
+                ->where('type', 4)
+                ->where(function ($query) use ($winRemark, $locked) {
+                    $query->where('remark', $winRemark)
+                        ->orWhere('remark', 'like', 'Trade win bonus #' . $locked->id);
+                })
+                ->orderByDesc('id')
+                ->first(['num']);
+
+            $alreadyCredited = $winBill
+                ? (float) $winBill->num
+                : ContractSettlementMath::winPayout($locked);
+
+            $debit = round($alreadyCredited - $lossRefund, 2);
+
+            if ($debit > 0) {
+                $this->debitUserBalance((int) $locked->uid, $debit, $adjustRemark);
+            }
+
+            $locked->update([
+                'is_win' => 2,
+                'ploss' => $profitAmount,
+                'kongyk' => 2,
+            ]);
+
+            Log::info('Converted hyorder win to loss', [
+                'id' => $locked->id,
+                'debit' => $debit,
+                'ploss' => $profitAmount,
+            ]);
+        });
+    }
+
+    /**
+     * Flip a settled loss into a win: credit (winPayout - lossRefund) so net matches a win.
+     */
+    public function convertLossToWin(Hyorder $order): void
+    {
+        DB::transaction(function () use ($order) {
+            $locked = Hyorder::query()->whereKey($order->id)->lockForUpdate()->first();
+
+            if (!$locked) {
+                throw new \RuntimeException('Order not found.');
+            }
+
+            if ((int) $locked->status !== 2) {
+                throw new \RuntimeException('Order is not settled.');
+            }
+
+            if ((int) $locked->is_win !== 2) {
+                throw new \RuntimeException('Order is not a loss.');
+            }
+
+            $adjustRemark = ContractSettlementMath::lossToWinRemark((int) $locked->id);
+
+            if (Bill::query()->where('uid', $locked->uid)->where('remark', $adjustRemark)->exists()) {
+                throw new \RuntimeException('Order already converted to win.');
+            }
+
+            $winPayout = ContractSettlementMath::winPayout($locked);
+            $profitAmount = ContractSettlementMath::profitAmount($locked);
+            $lossRemark = ContractSettlementMath::lossRemark((int) $locked->id);
+
+            $lossBill = Bill::query()
+                ->where('uid', $locked->uid)
+                ->where('type', 4)
+                ->where(function ($query) use ($lossRemark, $locked) {
+                    $query->where('remark', $lossRemark)
+                        ->orWhere('remark', 'like', 'Trade loss refund #' . $locked->id);
+                })
+                ->orderByDesc('id')
+                ->first(['num']);
+
+            $alreadyCredited = $lossBill
+                ? (float) $lossBill->num
+                : ContractSettlementMath::lossRefund($locked);
+
+            $adjustment = round($winPayout - $alreadyCredited, 2);
+
+            if ($adjustment > 0) {
+                $this->addUserBalance((int) $locked->uid, $adjustment, $adjustRemark);
+            }
+
+            $locked->update([
+                'is_win' => 1,
+                'ploss' => $profitAmount,
+                'kongyk' => 1,
+            ]);
+
+            Log::info('Converted hyorder loss to win', [
+                'id' => $locked->id,
+                'adjustment' => $adjustment,
+                'ploss' => $profitAmount,
+            ]);
+        });
     }
 
     protected function fetchSellPrice(string $coinname): float|string
@@ -277,6 +445,51 @@ class HyorderSettlementService
         if ($verified + 0.0001 < $after) {
             throw new \RuntimeException("Wallet credit verification failed for user {$userId}.");
         }
+
+        $user = User::query()->find($userId, ['id', 'username']);
+
+        if (!$user) {
+            throw new \RuntimeException("User not found: {$userId}.");
+        }
+
+        Bill::query()->create([
+            'uid' => $user->id,
+            'username' => $user->username,
+            'num' => $amount,
+            'coinname' => 'usdt',
+            'afternum' => $verified,
+            'type' => 4,
+            'addtime' => now()->format('Y-m-d H:i:s'),
+            'st' => 1,
+            'remark' => $remark,
+        ]);
+    }
+
+    protected function debitUserBalance(int $userId, float $amount, string $remark): void
+    {
+        if ($amount <= 0) {
+            return;
+        }
+
+        if (Bill::query()->where('uid', $userId)->where('remark', $remark)->exists()) {
+            return;
+        }
+
+        $userCoin = UserCoin::query()->where('userid', $userId)->lockForUpdate()->first();
+
+        if (!$userCoin) {
+            throw new \RuntimeException("User wallet not found for user {$userId}.");
+        }
+
+        $before = (float) $userCoin->usdt;
+        $after = $before - $amount;
+        $userCoin->usdt = number_format($after, 10, '.', '');
+
+        if (!$userCoin->save()) {
+            throw new \RuntimeException("Failed to debit user {$userId} wallet.");
+        }
+
+        $verified = (float) UserCoin::query()->where('userid', $userId)->value('usdt');
 
         $user = User::query()->find($userId, ['id', 'username']);
 

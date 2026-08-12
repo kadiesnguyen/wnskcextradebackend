@@ -227,9 +227,36 @@ export function UserListContainer() {
                   <SelectCell><RowCheckbox checked={selection.isSelected(user.id)} onChange={() => selection.toggleOne(user.id)} label={user.username} /></SelectCell>
                   <DataTableCell columnKey="username" className="break-all font-medium">{user.username}</DataTableCell>
                   <DataTableCell columnKey="assets" className="text-xs text-muted">
-                    <div>USDT: <span className="text-foreground">{formatAsset(user.usdt)}</span></div>
-                    <div>BTC: <span className="text-foreground">{formatAsset(user.btc)}</span></div>
-                    <div>ETH: <span className="text-foreground">{formatAsset(user.eth)}</span></div>
+                    <div>
+                      {t("common.balance")}:{" "}
+                      <span className="text-foreground">{formatAsset(user.balance ?? user.usdt)}</span>
+                    </div>
+                    <div>
+                      {t("common.totalDeposit")}:{" "}
+                      <span className="text-foreground">{formatAsset(user.total_deposit)}</span>
+                    </div>
+                    <div>
+                      {t("common.totalWithdraw")}:{" "}
+                      <span className="text-foreground">{formatAsset(user.total_withdraw)}</span>
+                    </div>
+                    <div>
+                      {t("common.frozen")}:{" "}
+                      <span className="text-foreground">{formatAsset(user.frozen)}</span>
+                    </div>
+                    <div>
+                      {t("common.profit")}:{" "}
+                      <span
+                        className={
+                          Number(user.profit ?? 0) > 0
+                            ? "text-success"
+                            : Number(user.profit ?? 0) < 0
+                              ? "text-danger"
+                              : "text-foreground"
+                        }
+                      >
+                        {formatAsset(user.profit)}
+                      </span>
+                    </div>
                   </DataTableCell>
                   <DataTableCell columnKey="status">{user.status === 1 ? t("userForm.statusNormal") : t("userForm.statusFreeze")}</DataTableCell>
                   <DataTableCell columnKey="verification">{renderVerification(user)}</DataTableCell>

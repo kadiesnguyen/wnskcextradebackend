@@ -63,6 +63,11 @@ class UserResource extends JsonResource
             'usdt' => $this->when(isset($this->user_coin), fn () => $this->user_coin->usdt ?? '0'),
             'btc' => $this->when(isset($this->user_coin), fn () => $this->user_coin->btc ?? '0'),
             'eth' => $this->when(isset($this->user_coin), fn () => $this->user_coin->eth ?? '0'),
+            'balance' => isset($this->user_coin) ? (string) ($this->user_coin->usdt ?? '0') : '0',
+            'frozen' => isset($this->user_coin) ? (string) ($this->user_coin->usdt_d ?? '0') : '0',
+            'total_deposit' => (string) ($this->total_deposit ?? '0'),
+            'total_withdraw' => (string) ($this->total_withdraw ?? '0'),
+            'profit' => (string) ($this->profit ?? '0'),
         ];
     }
 }

@@ -47,17 +47,20 @@ class ContractOrderBalanceService
                 continue;
             }
 
+            $orderId = (int) $order->id;
+            // Only this order's settlement bills — never match sibling orders'
+            // "Trade win/loss #NNNN" rows (that caused wrong P/L on the list).
             $settleBill = Bill::query()
                 ->where('uid', $order->uid)
                 ->where('type', 4)
                 ->where('id', '>', $buyBill->id)
-                ->where(function ($query) use ($order) {
-                    $query->where('remark', 'like', '%#' . $order->id)
-                        ->orWhereIn('remark', ['Trade win bonus', 'Trade loss refund'])
-                        ->orWhere('remark', 'like', 'Trade win bonus #%')
-                        ->orWhere('remark', 'like', 'Trade loss refund #%');
-                })
-                ->orderBy('id')
+                ->whereIn('remark', [
+                    ContractSettlementMath::winRemark($orderId),
+                    ContractSettlementMath::lossRemark($orderId),
+                    ContractSettlementMath::lossToWinRemark($orderId),
+                    ContractSettlementMath::winToLossRemark($orderId),
+                ])
+                ->orderByDesc('id')
                 ->first(['num', 'afternum']);
 
             $balanceBefore = round((float) $buyBill->afternum + (float) $buyBill->num, 2);

@@ -121,16 +121,22 @@ class ContractOrderController extends Controller
         }
 
         $order->refresh();
+        $kongyk = (int) $order->kongyk;
+        $due = (int) $order->intselltime <= now()->timestamp + 10;
 
-        if ((int) $order->status === 1 && (int) $order->intselltime <= now()->timestamp + 10) {
-            try {
+        try {
+            if ((int) $order->status === 2 && in_array($kongyk, [1, 2], true)) {
+                // Lệnh đã đóng: đảo thắng/thua từ lịch sử (forceResult).
+                $settlement->forceResult($order, $kongyk);
+            } elseif ((int) $order->status === 1 && $due) {
+                // Chỉ settle khi phiên đã hết - giữa phiên chỉ gắn kongyk rồi đợi.
                 $settlement->settle($order);
-            } catch (\Throwable $e) {
-                return response()->json([
-                    'status' => false,
-                    'message' => $e->getMessage() ?: 'System error.',
-                ], Response::HTTP_INTERNAL_SERVER_ERROR);
             }
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage() ?: 'System error.',
+            ], Response::HTTP_INTERNAL_SERVER_ERROR);
         }
 
         return response()->json([
@@ -169,6 +175,32 @@ class ContractOrderController extends Controller
         return response()->json([
             'status' => true,
             'message' => 'Order settled successfully.',
+        ]);
+    }
+
+    public function convertLossToWin(int $id, HyorderSettlementService $settlement): JsonResponse
+    {
+        $order = Hyorder::query()->find($id);
+
+        if (!$order) {
+            return response()->json([
+                'status' => false,
+                'message' => 'Order not found.',
+            ], Response::HTTP_NOT_FOUND);
+        }
+
+        try {
+            $settlement->convertLossToWin($order);
+        } catch (\Throwable $e) {
+            return response()->json([
+                'status' => false,
+                'message' => $e->getMessage() ?: 'System error.',
+            ], Response::HTTP_UNPROCESSABLE_ENTITY);
+        }
+
+        return response()->json([
+            'status' => true,
+            'message' => 'Order converted to win successfully.',
         ]);
     }
 

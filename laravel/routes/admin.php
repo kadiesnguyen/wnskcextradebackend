@@ -120,6 +120,7 @@ Route::middleware(['auth:admin', 'check.admin.status'])->group(function () {
     Route::post('contract-orders/mark-notified', [ContractOrderController::class, 'markNotified']);
     Route::put('contract-orders/win-loss', [ContractOrderController::class, 'setWinLoss']);
     Route::post('contract-orders/{id}/settle', [ContractOrderController::class, 'manualSettle'])->whereNumber('id');
+    Route::post('contract-orders/{id}/convert-to-win', [ContractOrderController::class, 'convertLossToWin'])->whereNumber('id');
     Route::post('contract-orders/settle-stuck', [ContractOrderController::class, 'settleStuck']);
 
     Route::get('trial-orders', [TrialOrderController::class, 'index']);

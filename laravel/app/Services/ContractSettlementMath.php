@@ -50,4 +50,20 @@ class ContractSettlementMath
             ? self::winRemark((int) $order->id)
             : self::lossRemark((int) $order->id);
     }
+
+    /** Credit needed to flip a settled loss into a win: winPayout - lossRefund (= 2 * profit). */
+    public static function lossToWinAdjustment(Hyorder $order): float
+    {
+        return round(self::winPayout($order) - self::lossRefund($order), 2);
+    }
+
+    public static function lossToWinRemark(int $orderId): string
+    {
+        return 'Trade loss-to-win adjust #' . $orderId;
+    }
+
+    public static function winToLossRemark(int $orderId): string
+    {
+        return 'Trade win-to-loss adjust #' . $orderId;
+    }
 }
