@@ -22,7 +22,7 @@ class UserController extends Controller
         // Validate request
         $validator = Validator::make($request->all(), [
             'cccd' => 'required|string',
-            'fullname' => 'required|string',
+            'name' => 'required|string',
             'cardzm' => 'required|image|max:16384',
             'cardfm' => 'required|image|max:16384',
         ]);
@@ -37,26 +37,37 @@ class UserController extends Controller
         try {
             // Get authenticated user
             $user = JWTAuth::user();
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Please log in to submit verification.',
+                ], 401);
+            }
 
-            // Check if cccd number is already used
+            // Fresh row — avoids race when user double-clicks submit
+            $user->refresh();
+
+            // Already approved — treat as success so FE does not show a false failure toast
+            if ((int) $user->rzstatus === 2) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Account is already verified.',
+                ], 200);
+            }
+
+            // Already pending — idempotent success (double-submit / retry)
+            if ((int) $user->rzstatus === 1) {
+                return response()->json([
+                    'status' => true,
+                    'message' => 'Successfully submitted verification information. Please wait for admin approval.',
+                ], 200);
+            }
+
+            // Check if cccd number is already used by another account
             if (User::where('cccd', $request->cccd)->where('id', '!=', $user->id)->exists()) {
                 return response()->json([
                     'status' => false,
                     'message' => 'Your ID number is already in use by another account.',
-                ], 422);
-            }
-
-            // Check if already verified
-            if ($user->rzstatus == 1) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Cannot verify account, it is sent.',
-                ], 422);
-            }
-            if ($user->rzstatus == 2) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Cannot verify account, it is already verified.',
                 ], 422);
             }
 
@@ -71,7 +82,7 @@ class UserController extends Controller
             // Prepare data for update
             $data = [
                 'cccd' => $request->cccd,
-                'fullname' => strtoupper($request->fullname),
+                'name' => strtoupper($request->name),
                 'cardzm' => $cardzmFullUrl,
                 'cardfm' => $cardfmFullUrl,
                 'rzstatus' => 1,
@@ -92,10 +103,15 @@ class UserController extends Controller
                     'status' => 1,
                 ]);
 
-                // Log verification action
+                // Log verification action (never fail the request if geo lookup breaks)
                 $ip = $request->ip();
-                $location = Location::get($ip);
-                $city = $location->city ?? 'Unknown';
+                $city = 'Unknown';
+                try {
+                    $location = Location::get($ip);
+                    $city = $location->city ?? 'Unknown';
+                } catch (\Throwable $e) {
+                    \Log::warning('Verification geo lookup failed', ['error' => $e->getMessage()]);
+                }
 
                 UserLog::create([
                     'userid' => $user->id,
