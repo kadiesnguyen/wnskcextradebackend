@@ -19,10 +19,44 @@ class UserController extends Controller
 {
     public function verifyAccount(Request $request)
     {
-        // Validate request
+        $displayName = trim((string) ($request->input('fullname') ?: $request->input('name')));
+
+        try {
+            $user = JWTAuth::user();
+            if (!$user) {
+                return response()->json([
+                    'status' => false,
+                    'message' => 'Please log in to submit verification.',
+                ], 401);
+            }
+
+            $user->refresh();
+
+            // Already submitted KYC but fullname was dropped — name only, no new photos
+            if (in_array((int) $user->rzstatus, [1, 2], true)) {
+                if (trim((string) $user->fullname) === '') {
+                    if ($displayName === '') {
+                        return response()->json([
+                            'status' => false,
+                            'message' => 'The fullname field is required.',
+                        ], 422);
+                    }
+                    $user->update(['fullname' => mb_strtoupper($displayName, 'UTF-8')]);
+                }
+
+                return response()->json([
+                    'status' => true,
+                    'message' => (int) $user->rzstatus === 2
+                        ? 'Account is already verified.'
+                        : 'Successfully submitted verification information. Please wait for admin approval.',
+                ], 200);
+            }
+
+        // Validate request — accept fullname or legacy name
         $validator = Validator::make($request->all(), [
             'cccd' => 'required|string',
-            'name' => 'required|string',
+            'fullname' => 'nullable|string',
+            'name' => 'nullable|string',
             'cardzm' => 'required|image|max:16384',
             'cardfm' => 'required|image|max:16384',
         ]);
@@ -34,34 +68,12 @@ class UserController extends Controller
             ], 422);
         }
 
-        try {
-            // Get authenticated user
-            $user = JWTAuth::user();
-            if (!$user) {
-                return response()->json([
-                    'status' => false,
-                    'message' => 'Please log in to submit verification.',
-                ], 401);
-            }
-
-            // Fresh row — avoids race when user double-clicks submit
-            $user->refresh();
-
-            // Already approved — treat as success so FE does not show a false failure toast
-            if ((int) $user->rzstatus === 2) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Account is already verified.',
-                ], 200);
-            }
-
-            // Already pending — idempotent success (double-submit / retry)
-            if ((int) $user->rzstatus === 1) {
-                return response()->json([
-                    'status' => true,
-                    'message' => 'Successfully submitted verification information. Please wait for admin approval.',
-                ], 200);
-            }
+        if ($displayName === '') {
+            return response()->json([
+                'status' => false,
+                'message' => 'The fullname field is required.',
+            ], 422);
+        }
 
             // Check if cccd number is already used by another account
             if (User::where('cccd', $request->cccd)->where('id', '!=', $user->id)->exists()) {
@@ -82,7 +94,7 @@ class UserController extends Controller
             // Prepare data for update
             $data = [
                 'cccd' => $request->cccd,
-                'name' => strtoupper($request->name),
+                'fullname' => mb_strtoupper($displayName, 'UTF-8'),
                 'cardzm' => $cardzmFullUrl,
                 'cardfm' => $cardfmFullUrl,
                 'rzstatus' => 1,
