@@ -422,14 +422,17 @@ class HyorderSettlementService
             return;
         }
 
-        if (Bill::query()->where('uid', $userId)->where('remark', $remark)->exists()) {
-            return;
-        }
-
+        // tw_hyorder/tw_bill are MyISAM, so the order row lock does not
+        // serialize cron and checkOrder. The wallet row is InnoDB: hold it
+        // before the duplicate-bill check or both callers credit.
         $userCoin = UserCoin::query()->where('userid', $userId)->lockForUpdate()->first();
 
         if (!$userCoin) {
             throw new \RuntimeException("User wallet not found for user {$userId}.");
+        }
+
+        if (Bill::query()->where('uid', $userId)->where('remark', $remark)->exists()) {
+            return;
         }
 
         $before = (float) $userCoin->usdt;
@@ -471,14 +474,14 @@ class HyorderSettlementService
             return;
         }
 
-        if (Bill::query()->where('uid', $userId)->where('remark', $remark)->exists()) {
-            return;
-        }
-
         $userCoin = UserCoin::query()->where('userid', $userId)->lockForUpdate()->first();
 
         if (!$userCoin) {
             throw new \RuntimeException("User wallet not found for user {$userId}.");
+        }
+
+        if (Bill::query()->where('uid', $userId)->where('remark', $remark)->exists()) {
+            return;
         }
 
         $before = (float) $userCoin->usdt;
